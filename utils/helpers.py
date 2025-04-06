@@ -6,6 +6,7 @@ from models.items.camouflage import Camouflage
 from models.items.health_kit import HealthKit
 from models.items.weapon import Weapon
 from models.items.weapon_upgrade import WeaponUpgrade
+from models.player import Player
 
 
 def choose_action_text():
@@ -30,44 +31,50 @@ def generate_item(location_items):
 
 def spawn_item(location_items, items):
     item_id = generate_item(location_items)
-    item_current_quantity = items[int(item_id) - 1].current_quantity
+    item_current_quantity = items[item_id].current_quantity
     while item_current_quantity == 0:
         item_id = generate_item(location_items)
-        item_current_quantity = items[int(item_id) - 1].current_quantity
+        item_current_quantity = items[item_id].current_quantity
     return item_id
 
 
 def create_item_from_data(item_id, item_data):
+    name = item_data["name"]
+    item_type = item_data["item_type"]
+    quantity = item_data["quantity"]
+    weight = item_data["weight"]
+    info = item_data["info"]
+    rules = item_data.get("rules", None)
 
-    item_type_to_class = {
-        "Оружие": Weapon,
-        "Бустер на оружие": WeaponUpgrade,
-        "Броня": Armor,
-        "Медикамент": HealthKit,
-        "Артефакт": Artefact,
-        "Маскировочное снаряжение": Camouflage
-    }
 
-    item_type_params = {
-        "Медикаменты": ["hp"],
-        "Оружие": ["weapon_type", "damage", "distance", "accuracy"],
-        "Бустер на оружие": ["accuracy_bonus"],
-        "Броня": ["damage_reduction"],
-        "Маскировочное снаряжение": ["cut_enemy_accuracy"],
-    }
+    match item_type:
+        case "Оружие":
+            return Weapon(item_id, name, item_type, quantity, weight, info, rules,
+                          item_data["weapon_type"], item_data["damage"],
+                          item_data["distance"], item_data["accuracy"])
 
-    item_type = item_data.get("item_type")
-    item_class = item_type_to_class.get(item_type)
+        case "Бустер на оружие":
+            return WeaponUpgrade(item_id, name, item_type, quantity, weight, info, rules, item_data["accuracy_bonus"])
 
-    name = item_data.get("name")
-    quantity = item_data.get("quantity")
-    weight = item_data.get("weight")
-    info = item_data.get("info")
+        case "Броня":
+            return Armor(item_id, name, item_type, quantity, weight, info, rules, item_data["damage_reduction"])
 
-    specific_params = {}
-    for param_name in item_type_params.get(item_type, []):
-        specific_params[param_name] = item_data.get(param_name)
+        case "Медикамент":
+            return HealthKit(item_id, name, item_type, quantity, weight, info, rules, item_data["hp"])
 
-    item = item_class(item_id, name, item_type, quantity, weight, info, **specific_params)
+        case "Артефакт":
+            return Artefact(item_id, name, item_type, quantity, weight, info, rules)
 
-    return item
+        case "Маскировочное снаряжение":
+            return Camouflage(item_id, name, item_type, quantity, weight, info, rules, item_data["cut_enemy_accuracy"])
+
+
+def create_players(quantity, names, units, locations, items):
+    players = {}
+    units_id = units.keys()
+    locations_id = locations.keys()
+    shuffle(units_id)
+    for i in range(quantity):
+        player = Player(names[i], units_id[i], choice(locations_id), units, locations, items)
+        players[str(i + 1)] = player
+    return players

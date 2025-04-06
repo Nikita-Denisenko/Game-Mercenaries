@@ -1,8 +1,10 @@
-from game_managment.entities import GameEntities
+from game_management.current_game import CurrentGame
+from game_management.entities import load_equipment, load_units, load_locations
 
-entities = GameEntities(equipment_path='data/equipment.json',
-                        locations_path='data/locations.json',
-                        units_path='data/units.json')
+equipment = load_equipment(r'D:\PyCharm projects\Game\data\equipment.json')
+units = load_units(r'D:\PyCharm projects\Game\data\units.json')
+locations = load_locations(r'D:\PyCharm projects\Game\data\locations.json', equipment)
 
-entities.locations
+players = None
 
+current_game = CurrentGame(equipment, locations, units, players)
