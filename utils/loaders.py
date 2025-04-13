@@ -1,8 +1,10 @@
 import json
 
 from models.location import Location
+from models.player import Player
 from models.unit import Unit
 from utils.helpers import create_item_from_data
+from random import shuffle, choice
 
 
 def load_units(units_path):
@@ -31,3 +33,14 @@ def load_equipment(equipment_path):
     for i in equipment_data:
         equipment[i] = create_item_from_data(i, equipment_data[i])
     return equipment
+
+
+def create_players(quantity, names, units, locations, items):
+    players = {}
+    units_id = units.keys()
+    locations_id = locations.keys()
+    shuffle(units_id)
+    for i in range(quantity):
+        player = Player(names[i], units_id[i], choice(locations_id), units, locations, items)
+        players[str(i + 1)] = player
+    return players

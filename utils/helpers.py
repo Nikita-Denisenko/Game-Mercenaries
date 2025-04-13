@@ -6,20 +6,6 @@ from models.items.camouflage import Camouflage
 from models.items.health_kit import HealthKit
 from models.items.weapon import Weapon
 from models.items.weapon_upgrade import WeaponUpgrade
-from models.player import Player
-
-
-def choose_action_text():
-    print("Выберите действие:")
-
-
-def number_of_action_text():
-    number = input("Введите номер действия: ")
-    return number
-
-
-def can_move_to_location(player, new_location_id):
-    return new_location_id in player.location.adjacent_locations or new_location_id in player.location.distant_locations
 
 
 def generate_item(location_items):
@@ -67,14 +53,3 @@ def create_item_from_data(item_id, item_data):
 
         case "Маскировочное снаряжение":
             return Camouflage(item_id, name, item_type, quantity, weight, info, rules, item_data["cut_enemy_accuracy"])
-
-
-def create_players(quantity, names, units, locations, items):
-    players = {}
-    units_id = units.keys()
-    locations_id = locations.keys()
-    shuffle(units_id)
-    for i in range(quantity):
-        player = Player(names[i], units_id[i], choice(locations_id), units, locations, items)
-        players[str(i + 1)] = player
-    return players
