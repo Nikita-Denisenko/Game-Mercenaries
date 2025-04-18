@@ -10,6 +10,10 @@ class Player:
         self.is_alive = True
 
     def take_item(self):
+        action_cost = 1
+        if self.unit.current_actions < action_cost:
+            print("Недостаточно действий! Дождитесь следующего хода.")
+            return
         item_id = self.location.location_item_id
         item = self.items[item_id]
         if self.inventory_weight + item.weight <= self.unit.weight:
@@ -18,6 +22,7 @@ class Player:
             item.current_quantity -= 1
             if item.item_type == "Артефакт":
                 self.different_artefacts.add(item)
+            self.unit.use_actions(action_cost)
         else:
             print("Вы не можете взять этот предмет!")
 
@@ -34,11 +39,21 @@ class Player:
 
 
     def change_location(self, new_location_id, locations):
-        if new_location_id in self.location.adjacent_locations or new_location_id in self.location.distant_locations:
-            self.location = locations[new_location_id]
-            print(f"{self.user_name} переместился в {self.location.name}")
+        if new_location_id in self.location.adjacent_locations:
+            action_cost = 1
+        elif new_location_id in self.location.distant_locations:
+            action_cost = 2
         else:
             print("Невозможно переместиться в эту локацию!")
+            return
+
+        if action_cost <= self.unit.current_actions:
+            self.location = locations[new_location_id]
+            self.unit.use_actions(action_cost)
+            print(f"{self.user_name} переместился в {self.location.name}")
+        else:
+            print("Недостаточно действий для перемещения! Дождитесь следующего хода.")
+
 
     def player_is_alive(self):
         self.is_alive = self.unit.is_alive()

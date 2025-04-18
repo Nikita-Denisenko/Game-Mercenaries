@@ -9,3 +9,4 @@ class Location:
         self.unavailable_locations = locations[location_id]["unavailable_locations"]
         self.items = locations[location_id]["items"]
         self.location_item_id = spawn_item(self.items, equipment)
+        self.rules = locations[location_id].get("rules", None)

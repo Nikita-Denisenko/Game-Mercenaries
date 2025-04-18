@@ -17,10 +17,7 @@ class Unit:
         self.current_health = min(self.current_health + health_points, self.max_health)
 
     def use_actions(self, quantity_actions):
-        if quantity_actions <= self.current_actions:
-            self.current_actions -= quantity_actions
-        else:
-            print("Недостаточно действий! Ожидайте следующего хода.")
+        self.current_actions -= quantity_actions
 
     def restore_actions(self):
         self.current_actions = self.actions

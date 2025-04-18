@@ -23,3 +23,11 @@ class CurrentGame:
             print(f"Номер игрока: {player_id}; Имя: {player.user_name}; Персонаж: {player.unit.name};")
             print(f"Здоровье: {player.unit.current_health}; Локация: {player.location.name};")
             print()
+
+
+    def weapon_fight(self, attacker, defender, weapon):
+        pass
+
+
+    def hand_fight(self, attacker, defender):
+        pass
