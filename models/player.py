@@ -7,7 +7,6 @@ class Player:
         self.inventory = []
         self.inventory_weight = 0
         self.different_artefacts = set()
-        self.is_alive = True
 
     def take_item(self):
         action_cost = 1
@@ -56,5 +55,5 @@ class Player:
 
 
     def player_is_alive(self):
-        self.is_alive = self.unit.is_alive()
+        return self.unit.is_alive()
 

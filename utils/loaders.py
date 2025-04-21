@@ -36,11 +36,11 @@ def load_equipment(equipment_path):
 
 
 def create_players(quantity, names, units, locations, items):
-    players = {}
+    players = []
     units_id = units.keys()
     locations_id = locations.keys()
     shuffle(units_id)
     for i in range(quantity):
         player = Player(names[i], units_id[i], choice(locations_id), units, locations, items)
-        players[str(i + 1)] = player
+        players.append(player)
     return players

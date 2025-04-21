@@ -1,29 +1,41 @@
+from random import choice
+
+EAGLE_CLIFF = "7"
+COLD_WEAPON = "Холодное оружие"
+GUNFIGHTER = "4"
+TORTOISE_MAN = "3"
+
+GAME_CUBE_LIST = [1, 2, 3, 4, 5, 6]
+GAME_CUBE_LIST_LENGTH = 6
+
 def calculate_distance(attackers_location, defenders_location):
     if attackers_location == defenders_location:
         return 0
 
-    if defenders_location.location_id in attackers_location.unavailable_locations:
-        distance = 3
-    elif defenders_location.location_id in attackers_location.distant_locations:
-        distance = 2
-    else:
-        distance = 1
+    distance = 0
 
-    if attackers_location.location_id == "7":
+    if attackers_location.location_id == EAGLE_CLIFF:
         distance -= attackers_location.rules["cut_distance_bonus"]
 
-    return distance
+    defenders_id = defenders_location.location_id
+
+    if defenders_id in attackers_location.unavailable_locations:
+        return distance + 3
+    if defenders_id in attackers_location.distant_locations:
+        return distance + 2
+    return distance + 1
+
 
 
 def calculate_accuracy(attacker, defender, weapon, laser_sight, camouflage, distance):
     accuracy = weapon.accuracy
     accuracy -= distance
-    if weapon.weapon_type != "Холодное оружие":
-        if attacker.unit.unit_id == "4":
+    if weapon.weapon_type != COLD_WEAPON:
+        if attacker.unit.unit_id == GUNFIGHTER:
             accuracy += attacker.unit.rules["accuracy_bonus"]
         if laser_sight in attacker.inventory:
             accuracy += laser_sight.rules["accuracy_bonus"]
-    if defender.unit.unit_id == "3":
+    if defender.unit.unit_id == TORTOISE_MAN:
         accuracy -= defender.unit.rules["cut_enemy_accuracy"]
     elif camouflage in defender.inventory:
         accuracy -= camouflage.rules["cut_enemy_accuracy"]
@@ -32,9 +44,14 @@ def calculate_accuracy(attacker, defender, weapon, laser_sight, camouflage, dist
 
 def calculate_damage(defender, weapon, armor):
     damage = weapon.damage
-    if weapon.weapon_type != "Холодное оружие":
-        if defender.unit.unit_id == "3":
+    if weapon.weapon_type != COLD_WEAPON:
+        if defender.unit.unit_id == TORTOISE_MAN:
             damage -= defender.unit.rules["cut_enemy_damage"]
         elif armor in defender.inventory:
             damage -= armor.damage_reduction
     return damage
+
+
+def hit_the_player(accuracy):
+    number = choice(GAME_CUBE_LIST)
+    return number > (GAME_CUBE_LIST_LENGTH - accuracy), number
