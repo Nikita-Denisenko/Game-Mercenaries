@@ -33,7 +33,7 @@
     "distance": 0,
     "accuracy": 4,
     "info": "У персонажей с уроном голой рукой больше 1, увеличивает рукопашный урон на 1.",
-    "rules": {"special_units_damage_bonus": 20}
+    "rules": {"hand_damage_bonus": 20}
   },
 
   "5": {

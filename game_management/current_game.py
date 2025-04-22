@@ -1,4 +1,5 @@
-from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player
+from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
+    calculate_hand_fight_damage, is_crab_man
 
 
 class CurrentGame:
@@ -29,6 +30,9 @@ class CurrentGame:
 
 
     def weapon_fight(self, attacker, defender, weapon, laser_sight, camouflage, armor):
+        if is_crab_man(attacker.unit):
+            print("Вы не можете пользоваться оружием, у вас клешни!:)")
+            return
         attackers_location = attacker.location
         defenders_location = defender.location
         distance = calculate_distance(attackers_location, defenders_location)
@@ -63,5 +67,24 @@ class CurrentGame:
 
 
 
-    def hand_fight(self, attacker, defender):
-        pass
+    def hand_fight(self, attacker, defender, knife):
+        defender_name = defender.name
+        damage = calculate_hand_fight_damage(attacker, defender, knife)
+        accuracy = knife.accuracy
+        flag = hit_the_player(accuracy)[0]
+        if not flag:
+            print(f"Игрок {defender_name} увернулся от вашей атаки!")
+            return
+
+        print(f"Вы атаковали игрока {defender_name}!")
+
+        defender.unit.take_damage(damage)
+
+        if not defender.unit.is_alive():
+            self.kill_player(defender)
+            print(f"Игрок {defender_name} был убит от вашей атаки!")
+            return
+
+        print(f"Игрок {defender_name} получил {damage} урона от вашей атаки.")
+        print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
+        

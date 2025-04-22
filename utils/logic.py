@@ -4,9 +4,15 @@ EAGLE_CLIFF = "7"
 COLD_WEAPON = "Холодное оружие"
 GUNFIGHTER = "4"
 TORTOISE_MAN = "3"
+HAND_FIGHTER = "2" # Бретер
+CRAB_MAN = "8"
+HAND_DAMAGE = 20
 
 GAME_CUBE_LIST = [1, 2, 3, 4, 5, 6]
 GAME_CUBE_LIST_LENGTH = 6
+
+def is_crab_man(unit):
+    return unit.unit_id == CRAB_MAN
 
 def calculate_distance(attackers_location, defenders_location):
     if attackers_location == defenders_location:
@@ -55,3 +61,18 @@ def calculate_damage(defender, weapon, armor):
 def hit_the_player(accuracy):
     number = choice(GAME_CUBE_LIST)
     return number > (GAME_CUBE_LIST_LENGTH - accuracy), number
+
+
+def calculate_hand_fight_damage(attacker, defender, knife):
+    if is_crab_man(attacker.unit):
+        return attacker.unit.rules["damage"]
+    damage = HAND_DAMAGE
+    if knife not in attacker.inventory:
+        if attacker.unit.unit_id != HAND_FIGHTER:
+            return damage
+        damage += attacker.unit.rules["hand_attack_bonus"]
+    damage += knife.rules["hand_damage_bonus"]
+
+    if defender.unit.unit_id != TORTOISE_MAN:
+        return damage
+    return damage - defender.unit.rules["cut_enemy_damage"]
