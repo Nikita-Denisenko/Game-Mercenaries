@@ -6,6 +6,7 @@ equipment = load_equipment(r'D:\PyCharm projects\Game\data\equipment.json')
 units = load_units(r'D:\PyCharm projects\Game\data\units.json')
 locations = load_locations(r'D:\PyCharm projects\Game\data\locations.json', equipment)
 
+game_over = False
 
 def main():
     # Выводим текст приветствия
@@ -28,4 +29,7 @@ def main():
 
 
 def game_loop(game):
-    pass
+    while not game_over:
+        for player in game.alive_players:
+            print(f"День {game.day_number}")
+            print(f"Ходит игрок {player.user_name}")

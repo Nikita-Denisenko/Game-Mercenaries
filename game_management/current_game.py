@@ -87,4 +87,3 @@ class CurrentGame:
 
         print(f"Игрок {defender_name} получил {damage} урона от вашей атаки.")
         print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
-        

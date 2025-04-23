@@ -47,7 +47,9 @@ class Player:
             return
 
         if action_cost <= self.unit.current_actions:
+            self.location.delete_player(self)
             self.location = locations[new_location_id]
+            self.location.add_player(self)
             self.unit.use_actions(action_cost)
             print(f"{self.user_name} переместился в {self.location.name}")
         else:

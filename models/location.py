@@ -9,4 +9,11 @@ class Location:
         self.unavailable_locations = locations[location_id]["unavailable_locations"]
         self.items = locations[location_id]["items"]
         self.location_item_id = spawn_item(self.items, equipment)
+        self.current_players = []
         self.rules = locations[location_id].get("rules", None)
+
+    def add_player(self, player):
+        self.current_players.append(player)
+
+    def delete_player(self, player):
+        self.current_players.remove(player)
