@@ -9,7 +9,6 @@ locations = load_locations(r'D:\PyCharm projects\Game\data\locations.json', equi
 game_over = False
 
 def main():
-    # Выводим текст приветствия
     print_hello_text()
     print_the_rules_text()
 
@@ -29,7 +28,9 @@ def main():
 
 
 def game_loop(game):
+    print("Игра началась. Роли игроков следующие:")
+    game.print_players_info()
+    print()
     while not game_over:
         for player in game.alive_players:
             print(f"День {game.day_number}")
-            print(f"Ходит игрок {player.user_name}")

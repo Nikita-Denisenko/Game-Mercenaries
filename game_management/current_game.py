@@ -1,5 +1,12 @@
+from utils.interface import print_choose_action_text, number_of_action
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man
+
+
+KNIFE = "4"
+LASER_SIGHT = "10"
+CAMOUFLAGE = "12"
+ARMOR = "11"
 
 
 class CurrentGame:
@@ -13,7 +20,7 @@ class CurrentGame:
 
     def finish_day(self):
         self.day_number += 1
-        for player in self.alive_players.values():
+        for player in self.alive_players:
             player.unit.restore_actions()
         print(f"День {self.day_number}")
 
@@ -23,10 +30,36 @@ class CurrentGame:
 
 
     def print_players_info(self):
-        for player_id, player in self.alive_players.items():
-            print(f"Номер игрока: {player_id}; Имя: {player.user_name}; Персонаж: {player.unit.name};")
+        players = self.alive_players
+        for player in players:
+            print(f"Имя: {player.user_name}; Персонаж: {player.unit.name};")
             print(f"Здоровье: {player.unit.current_health}; Локация: {player.location.name};")
-            print()
+            print("-" * 30)
+
+
+    def choose_player_to_attack(self):
+        players = self.alive_players
+        print("Выберите игрока, которого хотите атаковать.")
+        for i in range(1, len(players) + 1):
+            print(f"{i}. {players[i - 1].user_name}")
+        number = None
+        while number is None:
+            number = number_of_action()
+            if number is None or not (1 <= number <= len(players)):
+                print("Некорректный номер игрока. Попробуйте снова.")
+                number = None
+        return players[number - 1]
+
+
+
+    def print_locations_info(self):
+        print("Информация о текущем местоположении игроков:")
+        for location in self.locations:
+            if location.current_players:
+                players_names = ", ".join([player.user_name for player in location.current_players])
+            else:
+                players_names = "нет игроков"
+            print(f"{location.name}: {players_names}")
 
 
     def weapon_fight(self, attacker, defender, weapon, laser_sight, camouflage, armor):
@@ -87,3 +120,37 @@ class CurrentGame:
 
         print(f"Игрок {defender_name} получил {damage} урона от вашей атаки.")
         print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
+
+
+    def attack_player(self, attacker):
+        defender = self.choose_player_to_attack()
+        print("Выберите тип атаки:")
+        print("1. Стрельба из оружия")
+        print("2. Рукопашная атака")
+        number = None
+        while number not in [1, 2]:
+            number = number_of_action()
+        equipment = self.equipment
+        if number == 1:
+            weapon = attacker.choose_weapon()
+            if weapon is None:
+                return
+            laser_sight = equipment[LASER_SIGHT]
+            camouflage = equipment[CAMOUFLAGE]
+            armor = equipment[ARMOR]
+            self.weapon_fight(attacker, defender, weapon, laser_sight, camouflage, armor)
+        else:
+            knife = equipment[KNIFE]
+            self.hand_fight(attacker, defender, knife)
+
+
+    def player_turn(self, player):
+        actions = {
+
+        }
+        print(f"Ходит игрок {player.user_name}")
+        print()
+        player.print_player_info()
+        print()
+        print_choose_action_text()
+        print()

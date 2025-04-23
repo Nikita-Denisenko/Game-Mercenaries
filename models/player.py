@@ -1,3 +1,8 @@
+from utils.interface import number_of_action
+
+WEAPON = "Оружие"
+COLD_WEAPON = "Холодное оружие"
+
 class Player:
     def __init__(self, player_name, unit_id, start_location_id, units, locations, items):
         self.user_name = player_name
@@ -54,6 +59,35 @@ class Player:
             print(f"{self.user_name} переместился в {self.location.name}")
         else:
             print("Недостаточно действий для перемещения! Дождитесь следующего хода.")
+
+
+    def print_player_info(self):
+        print(f"Игрок {self.user_name}")
+        print(f"Персонаж: {self.unit.name}")
+        print(f"Текущее здоровье: {self.unit.current_health} из {self.unit.max_health}")
+        print(f"Локация: {self.location.name}")
+        print("Предметы:")
+        print(*self.get_inventory_names(), sep="\n")
+        print(f"Вес инвентаря: {self.inventory_weight}кг.")
+
+
+    def choose_weapon(self):
+        predicate = lambda item: (item.item_type == WEAPON) and (item.weapon_type != COLD_WEAPON)
+        weapons = list(filter(predicate, self.inventory))
+        if len(weapons) == 0:
+            print("У вас нет огнестрельного оружия в инвентаре!")
+            return None
+        print("Выберите оружие для стрельбы:")
+        for i in range(1, len(weapons) + 1):
+            print(f"{i}. {weapons[i - 1].name}")
+        number = None
+        while number is None:
+            number = number_of_action()
+            if number is None or not (1 <= number <= len(weapons)):
+                print("Некорректный номер оружия. Попробуйте снова.")
+                number = None
+        return weapons[number - 1]
+
 
 
     def player_is_alive(self):

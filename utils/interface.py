@@ -17,7 +17,15 @@ def print_the_rules_text():
          )
 
 
-def number_of_action_text():
+def print_choose_action_text():
+    print("Выберите действие:")
+    print("1. Переместиться")
+    print("2. Подобрать предмет")
+    print("3. Атаковать игрока")
+    print("4. Вылечиться")
+
+
+def number_of_action():
     try:
         number = int(input("Введите номер действия: "))
     except ValueError:

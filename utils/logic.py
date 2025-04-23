@@ -76,4 +76,3 @@ def calculate_hand_fight_damage(attacker, defender, knife):
     if defender.unit.unit_id != TORTOISE_MAN:
         return damage
     return damage - defender.unit.rules["cut_enemy_damage"]
-
