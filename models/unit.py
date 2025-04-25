@@ -24,3 +24,6 @@ class Unit:
 
     def is_alive(self):
         return self.current_health > 0
+
+    def print_actions_info(self):
+        print(f"У вас осталось действий: {self.current_actions} из {self.actions}")

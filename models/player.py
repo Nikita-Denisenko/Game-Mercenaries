@@ -65,6 +65,7 @@ class Player:
         print(f"Игрок {self.user_name}")
         print(f"Персонаж: {self.unit.name}")
         print(f"Текущее здоровье: {self.unit.current_health} из {self.unit.max_health}")
+        print(f"Количество действий: {self.unit.current_actions} из {self.unit.actions}")
         print(f"Локация: {self.location.name}")
         print("Предметы:")
         print(*self.get_inventory_names(), sep="\n")
@@ -88,6 +89,19 @@ class Player:
                 number = None
         return weapons[number - 1]
 
+    def use_health_kit(self, health_kit):
+        if health_kit not in self.inventory:
+            print("У вас нет аптечки в инвентаре!")
+            return
+        self.unit.restore_health(health_kit.hp)
+        self.throw_item(health_kit)
+        print(f"Вы использовали аптечку и восстановили {health_kit.hp} жизней.")
+        self.unit.print_actions_info()
+
+
+    def end_turn(self):
+        self.unit.current_actions = 0
+        print(f"Игрок {self.user_name} завершил свой ход.")
 
 
     def player_is_alive(self):

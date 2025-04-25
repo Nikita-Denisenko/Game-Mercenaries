@@ -1,4 +1,4 @@
-from utils.interface import print_choose_action_text, number_of_action
+from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_text
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man
 
@@ -46,7 +46,7 @@ class CurrentGame:
         while number is None:
             number = number_of_action()
             if number is None or not (1 <= number <= len(players)):
-                print("Некорректный номер игрока. Попробуйте снова.")
+                print("Некорректный номер игрока! Попробуйте снова.")
                 number = None
         return players[number - 1]
 
@@ -96,6 +96,7 @@ class CurrentGame:
 
         print(f"Игрок {defender_name} получил {damage} урона от вашего выстрела.")
         print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
+        attacker.unit.print_actions_info()
         return
 
 
@@ -120,33 +121,113 @@ class CurrentGame:
 
         print(f"Игрок {defender_name} получил {damage} урона от вашей атаки.")
         print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
+        attacker.unit.print_actions_info()
 
 
     def attack_player(self, attacker):
-        defender = self.choose_player_to_attack()
-        print("Выберите тип атаки:")
-        print("1. Стрельба из оружия")
-        print("2. Рукопашная атака")
-        number = None
-        while number not in [1, 2]:
-            number = number_of_action()
         equipment = self.equipment
-        if number == 1:
-            weapon = attacker.choose_weapon()
-            if weapon is None:
+        laser_sight = equipment[LASER_SIGHT]
+        camouflage = equipment[CAMOUFLAGE]
+        armor = equipment[ARMOR]
+        knife = equipment[KNIFE]
+
+        while True:
+            defender = self.choose_player_to_attack()
+            if defender is None:
+                print("Цель не выбрана.")
                 return
-            laser_sight = equipment[LASER_SIGHT]
-            camouflage = equipment[CAMOUFLAGE]
-            armor = equipment[ARMOR]
-            self.weapon_fight(attacker, defender, weapon, laser_sight, camouflage, armor)
+
+            distance = calculate_distance(attacker.location, defender.location)
+
+            print("Выберите тип атаки:")
+            print("1. Стрельба из оружия")
+            print("2. Рукопашная атака")
+            print("3. Отменить")
+
+            number = None
+            while number not in [1, 2, 3]:
+                number = number_of_action()
+
+            if number == 3:
+                print("Вы отменили атаку.")
+                return
+
+            if number == 1:
+                weapon = attacker.choose_weapon()
+                if weapon is None:
+                    return
+                if weapon.distance < distance:
+                    print("Оружие не достаёт до цели.")
+                    print("Хотите выбрать другую цель? (1 — да, 2 — нет)")
+                    retry = number_of_action()
+                    if retry == 1:
+                        continue  # вернуться к выбору цели
+                    else:
+                        return
+
+                self.weapon_fight(attacker, defender, weapon, laser_sight, camouflage, armor)
+                return
+
+            elif number == 2:
+                if attacker.location != defender.location:
+                    print("Рукопашная атака возможна только, если вы в одной локации с целью.")
+                    print("Хотите выбрать другую цель? (1 — да, 2 — нет)")
+                    retry = number_of_action()
+                    if retry == 1:
+                        continue
+                    else:
+                        return
+
+                self.hand_fight(attacker, defender, knife)
+                return
+
+
+    def to_move_player(self, player):
+        location = player.location
+        locations = self.locations
+        print(f"Вы находитесь в локации {location.name}")
+        print_choose_the_location_text()
+        while True:
+            new_location_id = number_of_action()
+            if new_location_id is None or not (1 <= new_location_id <= len(locations)):
+                print("Некорректный номер локации! Попробуйте снова.")
+                continue
+            player.change_location(new_location_id, locations)
+            if player.location != location:
+                break
+        player.unit.print_actions_info()
+
+
+    def search_location(self, player):
+        location = player.location
+        item_id = location.location_item_id
+        if item_id is None:
+            print("В этой локации нет предметов.")
+            return
+        item = self.equipment[item_id]
+        print(f"Вы нашли предмет: {item.name} (вес: {item.weight} кг).")
+        print("Хотите взять его?")
+        print("1. Да")
+        print("2. Нет")
+        choice = None
+        while choice not in [1, 2]:
+            choice = number_of_action()
+        if choice == 1:
+            player.take_item()
+            print(f"Вы подобрали предмет: {item.name} (вес: {item.weight} кг).")
         else:
-            knife = equipment[KNIFE]
-            self.hand_fight(attacker, defender, knife)
+            print("Вы решили не брать предмет.")
+        player.unit.print_actions_info()
+
 
 
     def player_turn(self, player):
         actions = {
-
+            1: self.to_move_player,
+            2: self.search_location,
+            3: self.attack_player,
+            4: player.use_health_kit,
+            5: player.end_turn,
         }
         print(f"Ходит игрок {player.user_name}")
         print()

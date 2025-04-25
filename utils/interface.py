@@ -20,10 +20,21 @@ def print_the_rules_text():
 def print_choose_action_text():
     print("Выберите действие:")
     print("1. Переместиться")
-    print("2. Подобрать предмет")
+    print("2. Обыскать локацию")
     print("3. Атаковать игрока")
     print("4. Вылечиться")
+    print("5. Завершить ход")
 
+
+def print_choose_the_location_text():
+    print("Выберите локацию:")
+    print("1. Разгромленный супермаркет")
+    print("2. Госпиталь")
+    print("3. Место крушения поезда")
+    print("4. Химический завод")
+    print("5. Загрязнённое побережье")
+    print("6. Пустошь")
+    print("7. Орлиный утёс")
 
 def number_of_action():
     try:
