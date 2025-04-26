@@ -1,7 +1,6 @@
 from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_text
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
-    calculate_hand_fight_damage, is_crab_man
-
+    calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -220,18 +219,30 @@ class CurrentGame:
         player.unit.print_actions_info()
 
 
-
     def player_turn(self, player):
         actions = {
             1: self.to_move_player,
             2: self.search_location,
             3: self.attack_player,
-            4: player.use_health_kit,
-            5: player.end_turn,
+            4: heal_the_player,
+            5: end_turn_for_player,
         }
-        print(f"Ходит игрок {player.user_name}")
-        print()
-        player.print_player_info()
-        print()
-        print_choose_action_text()
-        print()
+        end_turn_for_player_number = 5
+        while True:
+            print(f"Ходит игрок {player.user_name}")
+            print("-" * 30)
+            player.print_player_info()
+            print("-" * 30)
+            print_choose_action_text()
+            print("-" * 30)
+            while True:
+                number = number_of_action()
+                if number is None or not (1 <= number <= len(actions)):
+                    print("Некорректный номер действия. Попробуйте снова")
+                    continue
+                actions[number](player)
+                break
+            if player.unit.current_actions == 0:
+                print("У вас не осталось действий! Ход завершен!")
+                actions[end_turn_for_player_number](player)
+                return

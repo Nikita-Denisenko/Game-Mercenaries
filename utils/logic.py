@@ -76,3 +76,11 @@ def calculate_hand_fight_damage(attacker, defender, knife):
     if defender.unit.unit_id != TORTOISE_MAN:
         return damage
     return damage - defender.unit.rules["cut_enemy_damage"]
+
+
+def heal_the_player(player):
+    player.use_health_kit()
+    player.unit.print_actions_info()
+
+def end_turn_for_player(player):
+    player.end_turn()
