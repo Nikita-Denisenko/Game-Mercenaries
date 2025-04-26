@@ -78,6 +78,14 @@ def calculate_hand_fight_damage(attacker, defender, knife):
     return damage - defender.unit.rules["cut_enemy_damage"]
 
 
+def calculate_change_location_cost(location, new_location_id):
+    if new_location_id in location.adjacent_locations:
+        return 1
+    if new_location_id in location.distant_locations:
+        return 2
+    return None
+
+
 def heal_the_player(player):
     player.use_health_kit()
     player.unit.print_actions_info()

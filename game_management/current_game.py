@@ -1,4 +1,4 @@
-from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_text
+from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_info
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player
 
@@ -185,7 +185,7 @@ class CurrentGame:
         location = player.location
         locations = self.locations
         print(f"Вы находитесь в локации {location.name}")
-        print_choose_the_location_text()
+        print_choose_the_location_info(location, locations)
         while True:
             new_location_id = number_of_action()
             if new_location_id is None or not (1 <= new_location_id <= len(locations)):

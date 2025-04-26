@@ -1,3 +1,6 @@
+from utils.logic import calculate_change_location_cost
+
+
 def print_hello_text():
     print('''
 Добро пожаловать в игру Наёмники!
@@ -26,16 +29,6 @@ def print_choose_action_text():
     print("5. Завершить ход")
 
 
-def print_choose_the_location_text():
-    print("Выберите локацию:")
-    print("1. Разгромленный супермаркет")
-    print("2. Госпиталь")
-    print("3. Место крушения поезда")
-    print("4. Химический завод")
-    print("5. Загрязнённое побережье")
-    print("6. Пустошь")
-    print("7. Орлиный утёс")
-
 def number_of_action():
     try:
         number = int(input("Введите номер действия: "))
@@ -60,3 +53,11 @@ def get_players_info():
 
     print("Игра успешно создана!")
     return quantity, names
+
+
+def print_choose_the_location_info(player_location, locations):
+    sorted_location_keys = sorted(locations.keys())
+    for locations_id in sorted_location_keys:
+        action_cost = calculate_change_location_cost(player_location, locations_id)
+        location_name = locations[locations_id].name
+        print(f"{locations_id}. {location_name} (Цена: {action_cost} действия)")

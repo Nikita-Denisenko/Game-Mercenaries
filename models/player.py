@@ -1,4 +1,5 @@
 from utils.interface import number_of_action
+from utils.logic import calculate_change_location_cost
 
 WEAPON = "Оружие"
 COLD_WEAPON = "Холодное оружие"
@@ -43,22 +44,20 @@ class Player:
 
 
     def change_location(self, new_location_id, locations):
-        if new_location_id in self.location.adjacent_locations:
-            action_cost = 1
-        elif new_location_id in self.location.distant_locations:
-            action_cost = 2
-        else:
+        action_cost = calculate_change_location_cost(self.location, new_location_id)
+        if action_cost is None:
             print("Невозможно переместиться в эту локацию!")
             return
 
-        if action_cost <= self.unit.current_actions:
-            self.location.delete_player(self)
-            self.location = locations[new_location_id]
-            self.location.add_player(self)
-            self.unit.use_actions(action_cost)
-            print(f"{self.user_name} переместился в {self.location.name}")
-        else:
+        if action_cost > self.unit.current_actions:
             print("Недостаточно действий для перемещения! Дождитесь следующего хода.")
+            return
+
+        self.location.delete_player(self)
+        self.location = locations[new_location_id]
+        self.location.add_player(self)
+        self.unit.use_actions(action_cost)
+        print(f"{self.user_name} переместился в {self.location.name}")
 
 
     def print_player_info(self):
