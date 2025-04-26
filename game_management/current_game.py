@@ -1,6 +1,7 @@
 from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_info
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
-    calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player
+    calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
+    get_adjacent_players
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -88,16 +89,38 @@ class CurrentGame:
 
         defender.unit.take_damage(damage)
 
-        if not defender.unit.is_alive():
-            self.kill_player(defender)
-            print(f"Игрок {defender_name} был убит от вашего выстрела!")
-            return
-
+        print("-" * 60)
         print(f"Игрок {defender_name} получил {damage} урона от вашего выстрела.")
         print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
-        attacker.unit.print_actions_info()
-        return
+        print("-" * 60)
+        print()
 
+        if is_grenade_launcher(weapon):
+            defenders_adjacent_players = get_adjacent_players(attacker, defender, defenders_location, self.locations)
+            for player in defenders_adjacent_players:
+                if player in (attacker, defender):
+                    continue
+                player_name = player.user_name
+                player_damage = weapon.rules["damage_for_adjacent_players"]
+                player.unit.take_damage(player_damage)
+                if not player.unit.is_alive():
+                    self.kill_player(player)
+                    print("-" * 60)
+                    print(f"Игрок {player_name} был убит от вашего выстрела!")
+                    print("-" * 60)
+                print("-" * 60)
+                print(f"Игрок {player_name} получил {player_damage} урона от вашего выстрела.")
+                print(f"Текущее здоровье игрока {player_name}: {player.unit.current_health} из {player.unit.max_health}")
+                print("-" * 60)
+
+        if not defender.unit.is_alive():
+            self.kill_player(defender)
+            print("-" * 60)
+            print(f"Игрок {defender_name} был убит от вашего выстрела!")
+            print("-" * 60)
+            print()
+
+        attacker.unit.print_actions_info()
 
 
     def hand_fight(self, attacker, defender, knife):

@@ -7,12 +7,17 @@ TORTOISE_MAN = "3"
 HAND_FIGHTER = "2" # Бретер
 CRAB_MAN = "8"
 HAND_DAMAGE = 20
-
+GRENADE_LAUNCHER = "8"
 GAME_CUBE_LIST = [1, 2, 3, 4, 5, 6]
 GAME_CUBE_LIST_LENGTH = 6
 
+
 def is_crab_man(unit):
     return unit.unit_id == CRAB_MAN
+
+def is_grenade_launcher(weapon):
+    return weapon.item_id == GRENADE_LAUNCHER
+
 
 def calculate_distance(attackers_location, defenders_location):
     if attackers_location == defenders_location:
@@ -92,3 +97,17 @@ def heal_the_player(player):
 
 def end_turn_for_player(player):
     player.end_turn()
+
+
+def get_adjacent_players(attacker, defender, defenders_location, locations):
+    predicate = lambda player: player not in (attacker, defender)
+
+    players_on_defenders_location = list(filter(predicate, defenders_location.current_players))
+    adjacent_defenders_locations = [locations[l] for l in defenders_location.adjacent_locations]
+    players_on_adjacent_defenders_locations = []
+
+    for location in adjacent_defenders_locations:
+        players = list(filter(predicate, location.current_players))
+        players_on_adjacent_defenders_locations.extend(players)
+
+    return players_on_defenders_location + players_on_adjacent_defenders_locations
