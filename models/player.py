@@ -15,21 +15,16 @@ class Player:
         self.different_artefacts = set()
 
     def take_item(self):
-        action_cost = 1
-        if self.unit.current_actions < action_cost:
-            print("Недостаточно действий! Дождитесь следующего хода.")
-            return
         item_id = self.location.location_item_id
         item = self.items[item_id]
-        if self.inventory_weight + item.weight <= self.unit.weight:
-            self.inventory.append(item)
-            self.inventory_weight += item.weight
-            item.current_quantity -= 1
-            if item.item_type == "Артефакт":
-                self.different_artefacts.add(item)
-            self.unit.use_actions(action_cost)
-        else:
+        if self.inventory_weight + item.weight > self.unit.weight:
             print("Вы не можете взять этот предмет!")
+            return
+        self.inventory.append(item)
+        self.inventory_weight += item.weight
+        item.current_quantity -= 1
+        if item.item_type == "Артефакт":
+            self.different_artefacts.add(item)
 
     def throw_item(self, item):
         if item in self.inventory:
@@ -89,12 +84,14 @@ class Player:
         return weapons[number - 1]
 
     def use_health_kit(self, health_kit):
+        action_cost = 1
         if health_kit not in self.inventory:
             print("У вас нет аптечки в инвентаре!")
             return
         self.unit.restore_health(health_kit.hp)
         self.throw_item(health_kit)
         print(f"Вы использовали аптечку и восстановили {health_kit.hp} жизней.")
+        self.unit.use_actions(action_cost)
         self.unit.print_actions_info()
 
 

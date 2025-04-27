@@ -59,7 +59,7 @@
     "distance": 1,
     "accuracy": 4,
     "info": "Выстрелив и промахнувшись, можно выстрелить в того же игрока ещё раз, однако с упавшей на 1 точностью.",
-    "rules": {"second_shot_accuracy": 3}
+    "rules": {"second_shot_cut_accuracy": 1}
   },
 
   "7": {

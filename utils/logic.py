@@ -8,6 +8,7 @@ HAND_FIGHTER = "2" # Бретер
 CRAB_MAN = "8"
 HAND_DAMAGE = 20
 GRENADE_LAUNCHER = "8"
+MP7 = "6"
 GAME_CUBE_LIST = [1, 2, 3, 4, 5, 6]
 GAME_CUBE_LIST_LENGTH = 6
 
@@ -17,6 +18,9 @@ def is_crab_man(unit):
 
 def is_grenade_launcher(weapon):
     return weapon.item_id == GRENADE_LAUNCHER
+
+def is_mp7(weapon):
+    return weapon.item_id == MP7
 
 
 def calculate_distance(attackers_location, defenders_location):

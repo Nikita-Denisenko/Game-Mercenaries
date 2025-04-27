@@ -1,7 +1,7 @@
 from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_info
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
-    get_adjacent_players
+    get_adjacent_players, is_mp7
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -76,6 +76,33 @@ class CurrentGame:
         flag, number = hit_the_player(accuracy)
         if not flag:
             print(f"Вы не попали в игрока {defender_name}!")
+
+            if not is_mp7(weapon):
+                return
+            second_shot_accuracy = accuracy + weapon.rules["second_shot_cut_accuracy"]
+            second_flag = hit_the_player(second_shot_accuracy)[0]
+
+            if not second_flag:
+                print(f"Увы, вы не попали в игрока {defender_name} и со второго выстрела!")
+                return
+            print(f"Вы попали в игрока {defender_name} со второго выстрела!")
+            defender.unit.take_damage(damage)
+
+            if not defender.unit.is_alive():
+                self.kill_player(defender)
+                print("-" * 60)
+                print(f"Игрок {defender_name} был убит от вашего выстрела!")
+                print("-" * 60)
+                print()
+                attacker.unit.print_actions_info()
+                return
+
+            print("-" * 60)
+            print(f"Игрок {defender_name} получил {damage} урона от вашего выстрела.")
+            print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
+            print("-" * 60)
+            print()
+            attacker.unit.print_actions_info()
             return
 
         print(f"Вы попали в игрока {defender_name}!")
@@ -147,6 +174,7 @@ class CurrentGame:
 
 
     def attack_player(self, attacker):
+        action_cost = 1
         equipment = self.equipment
         laser_sight = equipment[LASER_SIGHT]
         camouflage = equipment[CAMOUFLAGE]
@@ -188,6 +216,7 @@ class CurrentGame:
                         return
 
                 self.weapon_fight(attacker, defender, weapon, laser_sight, camouflage, armor)
+                attacker.unit.use_actions(action_cost)
                 return
 
             elif number == 2:
@@ -201,6 +230,7 @@ class CurrentGame:
                         return
 
                 self.hand_fight(attacker, defender, knife)
+                attacker.unit.use_actions(action_cost)
                 return
 
 
@@ -221,6 +251,8 @@ class CurrentGame:
 
 
     def search_location(self, player):
+        action_cost = 1
+        player.unit.use_actions(action_cost)
         location = player.location
         item_id = location.location_item_id
         if item_id is None:
