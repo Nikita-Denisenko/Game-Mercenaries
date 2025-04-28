@@ -1,5 +1,7 @@
 from random import choice
 
+from utils.interface import print_player_was_killed_text, print_player_was_damaged_text
+
 EAGLE_CLIFF = "7"
 COLD_WEAPON = "Холодное оружие"
 GUNFIGHTER = "4"
@@ -115,3 +117,55 @@ def get_adjacent_players(attacker, defender, defenders_location, locations):
         players_on_adjacent_defenders_locations.extend(players)
 
     return players_on_defenders_location + players_on_adjacent_defenders_locations
+
+
+def process_second_shot_mp7(attacker, defender, weapon, damage, accuracy):
+    second_shot_accuracy = accuracy + weapon.rules["second_shot_cut_accuracy"]
+    second_flag = hit_the_player(second_shot_accuracy)[0]
+
+    defender_name = defender.name
+
+    if not second_flag:
+        print(f"Увы, вы не попали в игрока {defender_name} и со второго выстрела!")
+        return False
+
+    print(f"Вы попали в игрока {defender_name} со второго выстрела!")
+    defender.unit.take_damage(damage)
+
+    if not defender.unit.is_alive():
+        attacker.game.kill_player(defender)
+        print_player_was_killed_text(defender_name)
+
+    print_player_was_damaged_text(defender_name, damage, defender)
+    attacker.unit.print_actions_info()
+    return True
+
+
+def process_armor_break(defender, damage, armor, camouflage):
+    defender_inventory = defender.inventory
+
+    if (armor in defender_inventory) or (camouflage in defender_inventory):
+        defender.throw_item(armor)
+        defender.throw_item(camouflage)
+        damage += 20
+        print(f"Защитная экипировка игрока {defender.user_name} разрушена!")
+
+    return damage
+
+
+def process_grenade_explosion(game, attacker, defender, weapon, defenders_location):
+    defenders_adjacent_players = get_adjacent_players(attacker, defender, defenders_location, game.locations)
+
+    for player in defenders_adjacent_players:
+        if player in (attacker, defender):
+            continue
+        player_name = player.user_name
+        player_damage = weapon.rules["damage_for_adjacent_players"]
+
+        player.unit.take_damage(player_damage)
+
+        if not player.unit.is_alive():
+            game.kill_player(player)
+            print_player_was_killed_text(player_name)
+
+        print_player_was_damaged_text(player_name, player_damage, player)

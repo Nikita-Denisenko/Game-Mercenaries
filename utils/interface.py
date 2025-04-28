@@ -61,3 +61,18 @@ def print_choose_the_location_info(player_location, locations):
         action_cost = calculate_change_location_cost(player_location, locations_id)
         location_name = locations[locations_id].name
         print(f"{locations_id}. {location_name} (Цена: {action_cost} действия)")
+
+
+def print_player_was_killed_text(player_name):
+    print("-" * 60)
+    print(f"Игрок {player_name} был убит от вашего выстрела!")
+    print("-" * 60)
+    print()
+
+
+def print_player_was_damaged_text(player_name, damage, player):
+    print("-" * 60)
+    print(f"Игрок {player_name} получил {damage} урона от вашего выстрела.")
+    print(f"Текущее здоровье игрока {player_name}: {player.unit.current_health} из {player.unit.max_health}")
+    print("-" * 60)
+    print()

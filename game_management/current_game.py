@@ -1,7 +1,8 @@
-from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_info
+from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_info, \
+    print_player_was_killed_text, print_player_was_damaged_text
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
-    get_adjacent_players, is_mp7
+    is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -64,88 +65,39 @@ class CurrentGame:
 
     def weapon_fight(self, attacker, defender, weapon, laser_sight, camouflage, armor):
         if is_crab_man(attacker.unit):
-            print("Вы не можете пользоваться оружием, у вас клешни!:)")
+            print("Вы не можете пользоваться оружием, у вас клешни! :)")
             return
+
         attackers_location = attacker.location
         defenders_location = defender.location
         distance = calculate_distance(attackers_location, defenders_location)
         accuracy = calculate_accuracy(attacker, defender, weapon, laser_sight, camouflage, distance)
         damage = calculate_damage(defender, weapon, armor)
         defender_name = defender.name
-        defender_inventory = defender.inventory
+
         flag, number = hit_the_player(accuracy)
+
         if not flag:
-            print(f"Вы не попали в игрока {defender_name}!")
-
             if not is_mp7(weapon):
+                print(f"Вы не попали в игрока {defender_name}!")
                 return
-            second_shot_accuracy = accuracy + weapon.rules["second_shot_cut_accuracy"]
-            second_flag = hit_the_player(second_shot_accuracy)[0]
-
-            if not second_flag:
-                print(f"Увы, вы не попали в игрока {defender_name} и со второго выстрела!")
+            if not process_second_shot_mp7(attacker, defender, weapon, damage, accuracy):
                 return
-            print(f"Вы попали в игрока {defender_name} со второго выстрела!")
-            defender.unit.take_damage(damage)
-
-            if not defender.unit.is_alive():
-                self.kill_player(defender)
-                print("-" * 60)
-                print(f"Игрок {defender_name} был убит от вашего выстрела!")
-                print("-" * 60)
-                print()
-                attacker.unit.print_actions_info()
-                return
-
-            print("-" * 60)
-            print(f"Игрок {defender_name} получил {damage} урона от вашего выстрела.")
-            print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
-            print("-" * 60)
-            print()
-            attacker.unit.print_actions_info()
-            return
 
         print(f"Вы попали в игрока {defender_name}!")
 
         if number == 6:
-            if (armor in defender_inventory) or (camouflage in defender_inventory):
-                defender.throw_item(armor)
-                defender.throw_item(camouflage)
-                damage += 20  # Разрушенный бронежилет не уменьшает урон от текущего выстрела
-                print(f"Защитная экипировка игрока {defender_name} разрушена!")
+            damage = process_armor_break(defender, damage, armor, camouflage)
 
         defender.unit.take_damage(damage)
-
-        print("-" * 60)
-        print(f"Игрок {defender_name} получил {damage} урона от вашего выстрела.")
-        print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
-        print("-" * 60)
-        print()
+        print_player_was_damaged_text(defender_name, damage, defender)
 
         if is_grenade_launcher(weapon):
-            defenders_adjacent_players = get_adjacent_players(attacker, defender, defenders_location, self.locations)
-            for player in defenders_adjacent_players:
-                if player in (attacker, defender):
-                    continue
-                player_name = player.user_name
-                player_damage = weapon.rules["damage_for_adjacent_players"]
-                player.unit.take_damage(player_damage)
-                if not player.unit.is_alive():
-                    self.kill_player(player)
-                    print("-" * 60)
-                    print(f"Игрок {player_name} был убит от вашего выстрела!")
-                    print("-" * 60)
-                print("-" * 60)
-                print(f"Игрок {player_name} получил {player_damage} урона от вашего выстрела.")
-                print(f"Текущее здоровье игрока {player_name}: {player.unit.current_health} из {player.unit.max_health}")
-                print("-" * 60)
+            process_grenade_explosion(self, attacker, defender, weapon, defenders_location)
 
         if not defender.unit.is_alive():
             self.kill_player(defender)
-            print("-" * 60)
-            print(f"Игрок {defender_name} был убит от вашего выстрела!")
-            print("-" * 60)
-            print()
+            print_player_was_killed_text(defender_name)
 
         attacker.unit.print_actions_info()
 
