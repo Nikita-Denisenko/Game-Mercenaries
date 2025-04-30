@@ -1,8 +1,8 @@
-from utils.interface import print_choose_action_text, number_of_action, print_choose_the_location_info, \
-    print_player_was_killed_text, print_player_was_damaged_text
+from utils.interface import print_choose_action_text, number_of_action, \
+    print_player_was_killed_text, print_player_was_damaged_text, print_the_map
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
-    is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7
+    is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7, print_choose_the_location_info
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -189,6 +189,7 @@ class CurrentGame:
     def to_move_player(self, player):
         location = player.location
         locations = self.locations
+        print_the_map()
         print(f"Вы находитесь в локации {location.name}")
         print_choose_the_location_info(location, locations)
         while True:

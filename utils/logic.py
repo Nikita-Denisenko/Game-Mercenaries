@@ -74,6 +74,14 @@ def hit_the_player(accuracy):
     return number > (GAME_CUBE_LIST_LENGTH - accuracy), number
 
 
+def print_choose_the_location_info(player_location, locations):
+    sorted_location_keys = sorted(locations.keys())
+    for locations_id in sorted_location_keys:
+        action_cost = calculate_change_location_cost(player_location, locations_id)
+        location_name = locations[locations_id].name
+        print(f"{locations_id}. {location_name} (Цена: {action_cost} действия)")
+
+
 def calculate_hand_fight_damage(attacker, defender, knife):
     if is_crab_man(attacker.unit):
         return attacker.unit.rules["damage"]

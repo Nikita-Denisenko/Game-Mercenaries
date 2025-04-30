@@ -1,6 +1,3 @@
-from utils.logic import calculate_change_location_cost
-
-
 def print_hello_text():
     print('''
 Добро пожаловать в игру Наёмники!
@@ -18,6 +15,31 @@ def print_the_rules_text():
             
           '''
          )
+
+
+def print_the_map():
+    print(                                "Карта"                                 )
+    print(                                                                        )
+    print("      [Химический завод]----------------------[Загрязнённое побережье]")
+    print("      |                 \                    /                 |      ")
+    print("      |                  \                  /                  |      ")
+    print("      |                   \                /                   |      ")
+    print("      |                    \              /                    |      ")
+    print("      |                     \            /                     |      ")
+    print("      |                      \          /                      |      ")
+    print("      |                       [Пустошь]                        |      ")
+    print("      |                           |                            |      ")
+    print("      |                           |                            |      ")
+    print("      |                           |                            |      ")
+    print("      |                           |                            |      ")
+    print("[Место крушения поезда]-----[Орлиный утёс]-----[Разгромленный супермаркет]")
+    print("                      \                       /                           ")
+    print("                       \                     /                            ")
+    print("                        \                   /                             ")
+    print("                         \                 /                              ")
+    print("                          \               /                               ")
+    print("                           \             /                                ")
+    print("                             [Госпиталь]                                  ")
 
 
 def print_choose_action_text():
@@ -55,14 +77,6 @@ def get_players_info():
     return quantity, names
 
 
-def print_choose_the_location_info(player_location, locations):
-    sorted_location_keys = sorted(locations.keys())
-    for locations_id in sorted_location_keys:
-        action_cost = calculate_change_location_cost(player_location, locations_id)
-        location_name = locations[locations_id].name
-        print(f"{locations_id}. {location_name} (Цена: {action_cost} действия)")
-
-
 def print_player_was_killed_text(player_name):
     print("-" * 60)
     print(f"Игрок {player_name} был убит от вашего выстрела!")
@@ -76,3 +90,5 @@ def print_player_was_damaged_text(player_name, damage, player):
     print(f"Текущее здоровье игрока {player_name}: {player.unit.current_health} из {player.unit.max_health}")
     print("-" * 60)
     print()
+
+print_the_map()
