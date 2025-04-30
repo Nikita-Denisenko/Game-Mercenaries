@@ -1,6 +1,6 @@
 from random import choice
 
-from utils.interface import print_player_was_killed_text, print_player_was_damaged_text
+from utils.interface import print_player_was_killed_text, print_player_was_damaged_text, number_of_action
 
 EAGLE_CLIFF = "7"
 COLD_WEAPON = "Холодное оружие"
@@ -11,6 +11,7 @@ CRAB_MAN = "8"
 HAND_DAMAGE = 20
 GRENADE_LAUNCHER = "8"
 MP7 = "6"
+P350 = "5"
 GAME_CUBE_LIST = [1, 2, 3, 4, 5, 6]
 GAME_CUBE_LIST_LENGTH = 6
 
@@ -23,6 +24,9 @@ def is_grenade_launcher(weapon):
 
 def is_mp7(weapon):
     return weapon.item_id == MP7
+
+def is_p350(weapon):
+    return weapon.item_id == P350
 
 
 def calculate_distance(attackers_location, defenders_location):
@@ -177,3 +181,35 @@ def process_grenade_explosion(game, attacker, defender, weapon, defenders_locati
             print_player_was_killed_text(player_name)
 
         print_player_was_damaged_text(player_name, player_damage, player)
+
+
+def two_pistols_logic(game, attacker, defender, weapon, damage, accuracy):
+    if attacker.inventory.count(weapon) <= 1:
+        return False
+
+    print("Вы можете стрелять сразу из двух пистолетов, но с точностью -1 для обоих.")
+    print("1. Использовать один пистолет")
+    print("2. Использовать два пистолета")
+
+    number = number_of_action()
+
+    if number == 1:
+        return False
+
+    defender_name = defender.name
+
+    for i in range(1, 3):
+        print(f"Выстрел {i}")
+        flag = hit_the_player(accuracy - weapon.rules["two_pistols_cut_accuracy"])[0]
+        if not flag:
+            print(f"Вы не попали в игрока {defender_name}!")
+            continue
+        defender.unit.take_damage(damage)
+        print(f"Вы попали в игрока {defender_name}!")
+        if not defender.unit.is_alive():
+            game.kill_player(defender)
+            print_player_was_killed_text(defender_name)
+            return True
+        print_player_was_damaged_text(defender_name, damage, defender)
+    attacker.unit.print_actions_info()
+    return True

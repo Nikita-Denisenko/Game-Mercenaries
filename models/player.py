@@ -98,8 +98,3 @@ class Player:
     def end_turn(self):
         self.unit.current_actions = 0
         print(f"Игрок {self.user_name} завершил свой ход.")
-
-
-    def player_is_alive(self):
-        return self.unit.is_alive()
-

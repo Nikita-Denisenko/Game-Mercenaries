@@ -2,7 +2,8 @@ from utils.interface import print_choose_action_text, number_of_action, \
     print_player_was_killed_text, print_player_was_damaged_text, print_the_map
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
-    is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7, print_choose_the_location_info
+    is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7, print_choose_the_location_info, \
+    is_p350, two_pistols_logic
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -74,6 +75,10 @@ class CurrentGame:
         accuracy = calculate_accuracy(attacker, defender, weapon, laser_sight, camouflage, distance)
         damage = calculate_damage(defender, weapon, armor)
         defender_name = defender.name
+
+        if is_p350(weapon):
+            if two_pistols_logic(self, attacker, defender, weapon, damage, accuracy):
+                return
 
         flag, number = hit_the_player(accuracy)
 
