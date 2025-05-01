@@ -69,7 +69,8 @@ def get_players_info():
     if not 2 <= quantity <= 6:
         raise ValueError("Ошибка: Количество игроков должно быть от 2 до 6.")
 
-    names = input("Введите имена игроков через пробел: ").split()
+    names_string = input("Введите имена игроков через пробел: ")
+    names = names_string.split()
     if len(names) != quantity:
         raise ValueError("Ошибка: Количество имен не совпадает с количеством игроков.")
 
@@ -90,5 +91,3 @@ def print_player_was_damaged_text(player_name, damage, player):
     print(f"Текущее здоровье игрока {player_name}: {player.unit.current_health} из {player.unit.max_health}")
     print("-" * 60)
     print()
-
-print_the_map()

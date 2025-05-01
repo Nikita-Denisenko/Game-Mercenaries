@@ -3,6 +3,7 @@ from random import choice
 from utils.interface import print_player_was_killed_text, print_player_was_damaged_text, number_of_action
 
 EAGLE_CLIFF = "7"
+CHEMICAL_FACTORY = "4"
 COLD_WEAPON = "Холодное оружие"
 GUNFIGHTER = "4"
 TORTOISE_MAN = "3"
@@ -14,6 +15,8 @@ MP7 = "6"
 P350 = "5"
 GAME_CUBE_LIST = [1, 2, 3, 4, 5, 6]
 GAME_CUBE_LIST_LENGTH = 6
+BREAK_ARMOR_NUMBER = 6
+INJURY_IN_CHEMICAL_FACTORY_NUMBER = 1
 
 
 def is_crab_man(unit):
@@ -79,7 +82,7 @@ def hit_the_player(accuracy):
 
 
 def print_choose_the_location_info(player_location, locations):
-    sorted_location_keys = sorted(locations.keys())
+    sorted_location_keys = sorted(locations.keys(), key=int)
     for locations_id in sorted_location_keys:
         action_cost = calculate_change_location_cost(player_location, locations_id)
         location_name = locations[locations_id].name
@@ -165,6 +168,10 @@ def process_armor_break(defender, damage, armor, camouflage):
     return damage
 
 
+def armor_is_broken(number):
+    return number == BREAK_ARMOR_NUMBER
+
+
 def process_grenade_explosion(game, attacker, defender, weapon, defenders_location):
     defenders_adjacent_players = get_adjacent_players(attacker, defender, defenders_location, game.locations)
 
@@ -179,6 +186,7 @@ def process_grenade_explosion(game, attacker, defender, weapon, defenders_locati
         if not player.unit.is_alive():
             game.kill_player(player)
             print_player_was_killed_text(player_name)
+            continue
 
         print_player_was_damaged_text(player_name, player_damage, player)
 
@@ -187,23 +195,28 @@ def two_pistols_logic(game, attacker, defender, weapon, damage, accuracy):
     if attacker.inventory.count(weapon) <= 1:
         return False
 
-    print("Вы можете стрелять сразу из двух пистолетов, но с точностью -1 для обоих.")
-    print("1. Использовать один пистолет")
-    print("2. Использовать два пистолета")
-
-    number = number_of_action()
+    while True:
+        print("1. Использовать один пистолет")
+        print("2. Использовать два пистолета")
+        number = number_of_action()
+        if number in (1, 2):
+            break
+        print("Неверный ввод. Пожалуйста, введите 1 или 2.")
 
     if number == 1:
         return False
 
     defender_name = defender.name
 
+    both_missed = True
+
     for i in range(1, 3):
         print(f"Выстрел {i}")
-        flag = hit_the_player(accuracy - weapon.rules["two_pistols_cut_accuracy"])[0]
+        flag, number = hit_the_player(accuracy - weapon.rules["two_pistols_cut_accuracy"])
         if not flag:
             print(f"Вы не попали в игрока {defender_name}!")
             continue
+        both_missed = False
         defender.unit.take_damage(damage)
         print(f"Вы попали в игрока {defender_name}!")
         if not defender.unit.is_alive():
@@ -211,5 +224,23 @@ def two_pistols_logic(game, attacker, defender, weapon, damage, accuracy):
             print_player_was_killed_text(defender_name)
             return True
         print_player_was_damaged_text(defender_name, damage, defender)
-    attacker.unit.print_actions_info()
+    player_was_died_on_chemical_factory(game, attacker, attacker.location, number)
+    if both_missed:
+        attacker.unit.print_actions_info()
     return True
+
+
+def player_was_died_on_chemical_factory(game, attacker, attackers_location, number):
+    if attackers_location.location_id != CHEMICAL_FACTORY:
+        return False
+    if number != INJURY_IN_CHEMICAL_FACTORY_NUMBER:
+        return False
+    damage = attackers_location.rules["missed_player_cut_health"]
+    attacker.unit.take_damage(damage)
+    if not attacker.unit.is_alive():
+        game.kill_player(attacker)
+        print("Вы умерли от травмы на химическом заводе!")
+        return True
+    print("Вы получили травму на химическом заводе и потеряли 20 жизней!")
+    print(f"Ваше текущее здоровье: {attacker.unit.current_health} из {attacker.unit.max_health}")
+    return False

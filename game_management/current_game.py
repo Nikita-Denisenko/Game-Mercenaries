@@ -3,7 +3,7 @@ from utils.interface import print_choose_action_text, number_of_action, \
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
     is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7, print_choose_the_location_info, \
-    is_p350, two_pistols_logic
+    is_p350, two_pistols_logic, armor_is_broken, player_was_died_on_chemical_factory
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -82,6 +82,9 @@ class CurrentGame:
 
         flag, number = hit_the_player(accuracy)
 
+        if player_was_died_on_chemical_factory(self, attacker, attackers_location, number):
+            return
+
         if not flag:
             if not is_mp7(weapon):
                 print(f"Вы не попали в игрока {defender_name}!")
@@ -91,7 +94,7 @@ class CurrentGame:
 
         print(f"Вы попали в игрока {defender_name}!")
 
-        if number == 6:
+        if armor_is_broken(number):
             damage = process_armor_break(defender, damage, armor, camouflage)
 
         defender.unit.take_damage(damage)
@@ -129,7 +132,6 @@ class CurrentGame:
         print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
         attacker.unit.print_actions_info()
 
-
     def attack_player(self, attacker):
         action_cost = 1
         equipment = self.equipment
@@ -138,22 +140,23 @@ class CurrentGame:
         armor = equipment[ARMOR]
         knife = equipment[KNIFE]
 
+        defender = self.choose_player_to_attack()
+        if defender is None:
+            print("Цель не выбрана.")
+            return
+
+        distance = calculate_distance(attacker.location, defender.location)
+
         while True:
-            defender = self.choose_player_to_attack()
-            if defender is None:
-                print("Цель не выбрана.")
-                return
-
-            distance = calculate_distance(attacker.location, defender.location)
-
             print("Выберите тип атаки:")
             print("1. Стрельба из оружия")
             print("2. Рукопашная атака")
             print("3. Отменить")
 
-            number = None
-            while number not in [1, 2, 3]:
-                number = number_of_action()
+            number = number_of_action()
+            if number is None or number not in [1, 2, 3]:
+                print("Неверный ввод, пожалуйста, выберите 1, 2 или 3.")
+                continue
 
             if number == 3:
                 print("Вы отменили атаку.")
@@ -162,29 +165,41 @@ class CurrentGame:
             if number == 1:
                 weapon = attacker.choose_weapon()
                 if weapon is None:
+                    print("Оружие не выбрано.")
                     return
+
                 if weapon.distance < distance:
                     print("Оружие не достаёт до цели.")
-                    print("Хотите выбрать другую цель? (1 — да, 2 — нет)")
-                    retry = number_of_action()
+                    while True:
+                        print("Хотите выбрать другую цель? (1 — да, 2 — нет)")
+                        retry = number_of_action()
+                        if retry in [1, 2]:
+                            break
+                        print("Неверный ввод. Введите 1 или 2.")
+
                     if retry == 1:
-                        continue  # вернуться к выбору цели
-                    else:
-                        return
+                        return  # Перезапуск атаки с новой целью
+                    print("Вы отменили атаку.")
+                    return
 
                 self.weapon_fight(attacker, defender, weapon, laser_sight, camouflage, armor)
                 attacker.unit.use_actions(action_cost)
                 return
 
-            elif number == 2:
+            if number == 2:
                 if attacker.location != defender.location:
                     print("Рукопашная атака возможна только, если вы в одной локации с целью.")
-                    print("Хотите выбрать другую цель? (1 — да, 2 — нет)")
-                    retry = number_of_action()
+                    while True:
+                        print("Хотите выбрать другую цель? (1 — да, 2 — нет)")
+                        retry = number_of_action()
+                        if retry in [1, 2]:
+                            break
+                        print("Неверный ввод. Введите 1 или 2.")
+
                     if retry == 1:
-                        continue
-                    else:
                         return
+                    print("Вы отменили атаку.")
+                    return
 
                 self.hand_fight(attacker, defender, knife)
                 attacker.unit.use_actions(action_cost)
@@ -224,6 +239,8 @@ class CurrentGame:
         choice = None
         while choice not in [1, 2]:
             choice = number_of_action()
+            if choice is None:
+                print("Некорректный ввод, попробуйте снова.")
         if choice == 1:
             player.take_item()
             print(f"Вы подобрали предмет: {item.name} (вес: {item.weight} кг).")
