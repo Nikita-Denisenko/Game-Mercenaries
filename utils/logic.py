@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, randint
 
 from utils.interface import print_player_was_killed_text, print_player_was_damaged_text, number_of_action
 
@@ -9,6 +9,7 @@ GUNFIGHTER = "4"
 TORTOISE_MAN = "3"
 HAND_FIGHTER = "2" # Бретер
 CRAB_MAN = "8"
+LIZARD_MAN = "5"
 HAND_DAMAGE = 20
 GRENADE_LAUNCHER = "8"
 MP7 = "6"
@@ -21,6 +22,10 @@ INJURY_IN_CHEMICAL_FACTORY_NUMBER = 1
 
 def is_crab_man(unit):
     return unit.unit_id == CRAB_MAN
+
+def is_lizard_man(unit):
+    return unit.unit_id == LIZARD_MAN
+
 
 def is_grenade_launcher(weapon):
     return weapon.item_id == GRENADE_LAUNCHER
@@ -66,13 +71,16 @@ def calculate_accuracy(attacker, defender, weapon, laser_sight, camouflage, dist
     return accuracy
 
 
+def generate_damage_from_range(damage_range):
+    return randint(*damage_range)
+
+
 def calculate_damage(defender, weapon, armor):
-    damage = weapon.damage
-    if weapon.weapon_type != COLD_WEAPON:
-        if defender.unit.unit_id == TORTOISE_MAN:
-            damage -= defender.unit.rules["cut_enemy_damage"]
-        elif armor in defender.inventory:
-            damage -= armor.damage_reduction
+    damage = generate_damage_from_range(weapon.damage_range)
+    if defender.unit.unit_id == TORTOISE_MAN:
+        damage -= defender.unit.rules["cut_enemy_damage"]
+    elif armor in defender.inventory:
+        damage -= armor.damage_reduction
     return damage
 
 
@@ -97,7 +105,7 @@ def calculate_hand_fight_damage(attacker, defender, knife):
         if attacker.unit.unit_id != HAND_FIGHTER:
             return damage
         damage += attacker.unit.rules["hand_attack_bonus"]
-    damage += knife.rules["hand_damage_bonus"]
+    damage += randint(*knife.rules["hand_damage_bonus_range"])
 
     if defender.unit.unit_id != TORTOISE_MAN:
         return damage
@@ -244,3 +252,12 @@ def player_was_died_on_chemical_factory(game, attacker, attackers_location, numb
     print("Вы получили травму на химическом заводе и потеряли 20 жизней!")
     print(f"Ваше текущее здоровье: {attacker.unit.current_health} из {attacker.unit.max_health}")
     return False
+
+
+def lizard_man_logic(player):
+    if not is_lizard_man(player.unit):
+        return
+    hp_bonus = player.unit.rules["restore_hp_bonus"]
+    player.unit.restore_health(hp_bonus)
+    print(f'Вы использовали способность "Человека-ящера" и восстановили здоровье')
+    print(f"Ваше текущее здоровье: {player.unit.current_health} из {player.unit.max_health}")

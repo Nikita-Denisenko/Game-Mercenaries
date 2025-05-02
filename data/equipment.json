@@ -29,11 +29,11 @@
     "weapon_type": "Холодное оружие",
     "quantity": 3,
     "weight": 1,
-    "damage": 40,
+    "damage_range": [30, 45],
     "distance": 0,
     "accuracy": 4,
     "info": "У персонажей с уроном голой рукой больше 1, увеличивает рукопашный урон на 1.",
-    "rules": {"hand_damage_bonus": 20}
+    "rules": {"hand_damage_bonus_range": [10, 25]}
   },
 
   "5": {
@@ -42,7 +42,7 @@
     "weapon_type": "Пистолет",
     "quantity": 3,
     "weight": 1,
-    "damage": 40,
+    "damage_range": [20, 35],
     "distance": 1,
     "accuracy": 4,
     "info": "Персонаж взявший 2 пистолета может стрелять из них одновременно в одного персонажа за 1 действие, однако с пониженной на 1 точностью для обоих.",
@@ -55,7 +55,7 @@
     "weapon_type": "Пистолет-пулемет",
     "quantity": 2,
     "weight": 2,
-    "damage": 40,
+    "damage_range": [25, 45],
     "distance": 1,
     "accuracy": 4,
     "info": "Выстрелив и промахнувшись, можно выстрелить в того же игрока ещё раз, однако с упавшей на 1 точностью.",
@@ -68,7 +68,7 @@
     "weapon_type": "Автомат",
     "quantity": 1,
     "weight": 4,
-    "damage": 60,
+    "damage_range": [45, 70],
     "distance": 1,
     "accuracy": 4,
     "info": "Дополнительных свойств не имеет."
@@ -80,7 +80,7 @@
     "weapon_type": "Гранатомет",
     "quantity": 1,
     "weight": 6,
-    "damage": 80,
+    "damage_range": [60, 90],
     "distance": 1,
     "accuracy": 3,
     "info": "При попадании наносит, кроме цели, 20 урона персонажам, оказавшимся в той же локации или на соседних - кроме владельца гранатомёта",
@@ -93,7 +93,7 @@
     "weapon_type": "Снайперская винтовка",
     "quantity": 1,
     "weight": 4,
-    "damage": 40,
+    "damage_range": [50, 80],
     "distance": 2,
     "accuracy": 5,
     "info": "Дополнительных свойств не имеет."

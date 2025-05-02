@@ -3,7 +3,7 @@ from utils.interface import print_choose_action_text, number_of_action, \
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
     is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7, print_choose_the_location_info, \
-    is_p350, two_pistols_logic, armor_is_broken, player_was_died_on_chemical_factory
+    is_p350, two_pistols_logic, armor_is_broken, player_was_died_on_chemical_factory, lizard_man_logic
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -273,6 +273,7 @@ class CurrentGame:
                 actions[number](player)
                 break
             if player.unit.current_actions == 0:
+                lizard_man_logic(player)
                 print("У вас не осталось действий! Ход завершен!")
                 actions[end_turn_for_player_number](player)
                 return
