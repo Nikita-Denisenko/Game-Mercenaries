@@ -39,8 +39,8 @@ class CurrentGame:
             print("-" * 30)
 
 
-    def choose_player_to_attack(self):
-        players = self.alive_players
+    def choose_player_to_attack(self, attacker):
+        players = [player for player in self.alive_players if player != attacker]
         print("Выберите игрока, которого хотите атаковать.")
         for i in range(1, len(players) + 1):
             print(f"{i}. {players[i - 1].user_name}")
@@ -77,7 +77,7 @@ class CurrentGame:
         defender_name = defender.name
 
         if is_p350(weapon):
-            if two_pistols_logic(self, attacker, defender, weapon, damage, accuracy):
+            if two_pistols_logic(self, attacker, defender, weapon, accuracy):
                 return
 
         flag, number = hit_the_player(accuracy)
@@ -89,7 +89,7 @@ class CurrentGame:
             if not is_mp7(weapon):
                 print(f"Вы не попали в игрока {defender_name}!")
                 return
-            if not process_second_shot_mp7(attacker, defender, weapon, damage, accuracy):
+            if not process_second_shot_mp7(self, attacker, defender, weapon, accuracy):
                 return
 
         print(f"Вы попали в игрока {defender_name}!")
@@ -140,7 +140,7 @@ class CurrentGame:
         armor = equipment[ARMOR]
         knife = equipment[KNIFE]
 
-        defender = self.choose_player_to_attack()
+        defender = self.choose_player_to_attack(attacker)
         if defender is None:
             print("Цель не выбрана.")
             return

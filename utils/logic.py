@@ -14,6 +14,7 @@ HAND_DAMAGE = 20
 GRENADE_LAUNCHER = "8"
 MP7 = "6"
 P350 = "5"
+ARMOR = "11"
 GAME_CUBE_LIST = [1, 2, 3, 4, 5, 6]
 GAME_CUBE_LIST_LENGTH = 6
 BREAK_ARMOR_NUMBER = 6
@@ -142,7 +143,8 @@ def get_adjacent_players(attacker, defender, defenders_location, locations):
     return players_on_defenders_location + players_on_adjacent_defenders_locations
 
 
-def process_second_shot_mp7(attacker, defender, weapon, damage, accuracy):
+def process_second_shot_mp7(game, attacker, defender, weapon, accuracy):
+    damage = calculate_damage(defender, weapon, game.equipment[ARMOR])
     second_shot_accuracy = accuracy + weapon.rules["second_shot_cut_accuracy"]
     second_flag = hit_the_player(second_shot_accuracy)[0]
 
@@ -156,7 +158,7 @@ def process_second_shot_mp7(attacker, defender, weapon, damage, accuracy):
     defender.unit.take_damage(damage)
 
     if not defender.unit.is_alive():
-        attacker.game.kill_player(defender)
+        game.kill_player(defender)
         print_player_was_killed_text(defender_name)
 
     print_player_was_damaged_text(defender_name, damage, defender)
@@ -199,7 +201,7 @@ def process_grenade_explosion(game, attacker, defender, weapon, defenders_locati
         print_player_was_damaged_text(player_name, player_damage, player)
 
 
-def two_pistols_logic(game, attacker, defender, weapon, damage, accuracy):
+def two_pistols_logic(game, attacker, defender, weapon, accuracy):
     if attacker.inventory.count(weapon) <= 1:
         return False
 
@@ -225,6 +227,7 @@ def two_pistols_logic(game, attacker, defender, weapon, damage, accuracy):
             print(f"Вы не попали в игрока {defender_name}!")
             continue
         both_missed = False
+        damage = calculate_damage(defender, weapon, game.equipment[ARMOR])
         defender.unit.take_damage(damage)
         print(f"Вы попали в игрока {defender_name}!")
         if not defender.unit.is_alive():
