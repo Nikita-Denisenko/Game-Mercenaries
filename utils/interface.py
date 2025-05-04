@@ -50,7 +50,6 @@ def print_choose_action_text():
     print("4. Вылечиться (1 действие)")
     print("5. Завершить ход")
 
-
 def number_of_action():
     try:
         number = int(input("Введите номер действия: "))

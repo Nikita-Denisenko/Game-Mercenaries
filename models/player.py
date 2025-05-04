@@ -26,6 +26,14 @@ class Player:
         if item.item_type == "Артефакт":
             self.different_artefacts.add(item)
 
+    def get_item(self, item):
+        self.inventory.append(item)
+        self.inventory_weight += item.weight
+        item.current_quantity -= 1
+        if item.item_type == "Артефакт":
+            self.different_artefacts.add(item)
+
+
     def throw_item(self, item):
         if item in self.inventory:
             self.inventory.remove(item)

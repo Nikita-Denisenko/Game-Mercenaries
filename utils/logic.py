@@ -10,6 +10,7 @@ TORTOISE_MAN = "3"
 HAND_FIGHTER = "2" # Бретер
 CRAB_MAN = "8"
 LIZARD_MAN = "5"
+CHAMELEON_MAN = "6"
 HAND_DAMAGE = 20
 GRENADE_LAUNCHER = "8"
 MP7 = "6"
@@ -26,6 +27,9 @@ def is_crab_man(unit):
 
 def is_lizard_man(unit):
     return unit.unit_id == LIZARD_MAN
+
+def is_chameleon_man(unit):
+    return unit.unit_id == CHAMELEON_MAN
 
 
 def is_grenade_launcher(weapon):
@@ -264,3 +268,72 @@ def lizard_man_logic(player):
     player.unit.restore_health(hp_bonus)
     print(f'Вы использовали способность "Человека-ящера" и восстановили здоровье')
     print(f"Ваше текущее здоровье: {player.unit.current_health} из {player.unit.max_health}")
+
+
+def choose_player_for_steal_item(chameleon, chameleon_player_location):
+    players = [player for player in chameleon_player_location.current_players if player != chameleon]
+    for i in range(1, len(players) + 1):
+        player_name = players[i - 1].user_name
+        print(f"{i}. {player_name}")
+    n = number_of_action()
+    while n is None or not (1 <= n <= len(players)):
+        print("Некорректный номер игрока! Попробуйте снова.")
+        n = number_of_action()
+    return players[n - 1]
+
+
+def steal_item_for_chameleon_man(chameleon_player):
+    action_cost = 1
+    chameleon_player_location = chameleon_player.location
+    while True:
+        enemy = choose_player_for_steal_item(chameleon_player, chameleon_player_location)
+        enemy_name = enemy.name
+        enemy_inventory = enemy.inventory
+        inventory_names = enemy.get_inventory_names()
+        if len(enemy_inventory) == 0:
+            print("У этого игрока нет предметов! Выберите другого.")
+            continue
+        print("1. Далее")
+        print("2. Выбрать другого игрока")
+        print("3. Отменить действие")
+        n = number_of_action()
+        while n is None or n not in (1, 2, 3):
+            print("Некорректный номер предмета! Попробуйте снова.")
+            n = number_of_action()
+        if n == 3:
+            print("Вы отменили действие.")
+            return
+        if n == 2:
+            continue
+        while True:
+            print(f"Выберите предмет который вы хотите украсть у игрока {enemy_name}:")
+            for i in range(1, len(inventory_names) + 1):
+                print(f"{i}. {inventory_names[i - 1]}")
+            n = number_of_action()
+            while n is None or not (1 <= n <= len(inventory_names)):
+                print("Некорректный номер предмета! Попробуйте снова.")
+                n = number_of_action()
+            item = enemy_inventory[n - 1]
+            if chameleon_player.inventory_weight + item.weight > chameleon_player.unit.weight:
+                print("В вашем инвентаре нет места для того, чтобы украсть этот предмет! Выберите другой.")
+                print("1. Выбрать другой предмет")
+                print("2. Выбрать другого игрока")
+                print("3. Отменить действие")
+
+                n = number_of_action()
+                while n is None or n not in (1, 2, 3):
+                    print("Некорректный номер предмета! Попробуйте снова.")
+                    n = number_of_action()
+                if n == 3:
+                    print("Вы отменили действие.")
+                    return
+                if n == 2:
+                    break
+                continue
+
+            enemy.throw_item(item)
+            chameleon_player.get_item(item)
+            chameleon_player.unit.use_actions(action_cost)
+            print(f'Вы украли предмет "{item.name}" у игрока {enemy_name}.')
+            chameleon_player.unit.print_actions_info()
+            return
