@@ -42,13 +42,21 @@ def print_the_map():
     print("                             [Госпиталь]                                  ")
 
 
-def print_choose_action_text():
+def print_choose_action_text(location_explored, item_was_taken):
     print("Выберите действие:")
     print("1. Переместиться (1 или 2 действия)")
-    print("2. Обыскать локацию (1 действие)")
+    if not location_explored:
+        print("2. Обыскать локацию (1 действие)")
+    else:
+        if not item_was_taken:
+            print("2. Взять предмет")
+        else:
+            print("2. Взять предмет (Недоступно)")
     print("3. Атаковать игрока (1 действие)")
     print("4. Вылечиться (1 действие)")
-    print("5. Завершить ход")
+    print("5. Выбросить предмет из инвентаря")
+    print("6. Завершить ход")
+
 
 def number_of_action():
     try:

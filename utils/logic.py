@@ -337,3 +337,9 @@ def steal_item_for_chameleon_man(chameleon_player):
             print(f'Вы украли предмет "{item.name}" у игрока {enemy_name}.')
             chameleon_player.unit.print_actions_info()
             return
+
+
+def throw_item_from_inventory(player):
+    item_index = player.choose_the_item_to_throw()
+    item = player.inventory[item_index]
+    player.throw_item(item)

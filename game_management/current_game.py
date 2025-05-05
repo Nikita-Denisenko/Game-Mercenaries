@@ -4,7 +4,7 @@ from utils.logic import calculate_distance, calculate_accuracy, calculate_damage
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
     is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7, print_choose_the_location_info, \
     is_p350, two_pistols_logic, armor_is_broken, player_was_died_on_chemical_factory, lizard_man_logic, \
-    is_chameleon_man, steal_item_for_chameleon_man
+    is_chameleon_man, steal_item_for_chameleon_man, throw_item_from_inventory
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -228,7 +228,7 @@ class CurrentGame:
         action_cost = 1
         player.unit.use_actions(action_cost)
         location = player.location
-        item_id = location.location_item_id
+        item_id = location.location_items_by_player.get(player.user_name)
         if item_id is None:
             print("В этой локации нет предметов.")
             return
@@ -244,10 +244,16 @@ class CurrentGame:
                 print("Некорректный ввод, попробуйте снова.")
         if choice == 1:
             player.take_item()
-            print(f"Вы подобрали предмет: {item.name} (вес: {item.weight} кг).")
         else:
             print("Вы решили не брать предмет.")
+        player.location_explored = True
         player.unit.print_actions_info()
+
+
+    def spawn_start_items(self):
+        for location in self.locations.values():
+            for player in location.current_players:
+                location.spawn_item_for_player(player)
 
 
     def player_turn(self, player):
@@ -256,20 +262,25 @@ class CurrentGame:
             2: self.search_location,
             3: self.attack_player,
             4: heal_the_player,
-            5: end_turn_for_player,
-            6: steal_item_for_chameleon_man
+            5: throw_item_from_inventory,
+            6: end_turn_for_player,
+            7: steal_item_for_chameleon_man
         }
         len_actions = len(actions) - 1 # Без действия хамелеона
-        end_turn_for_player_number = 5
+        end_turn_for_player_number = 6
         while True:
+            location_explored = player.location_explored
+            item_was_taken = player.item_was_taken
+            if location_explored:
+                actions[2] = lambda p: p.take_item()
             print(f"Ходит игрок {player.user_name}")
             print("-" * 30)
             player.print_player_info()
             print("-" * 30)
-            print_choose_action_text()
+            print_choose_action_text(location_explored, item_was_taken)
             if is_chameleon_man(player.unit):
-                len_actions += 1 # Снимаем блокировку 6 ого действия, если игрок хамелеон
-                print("6. Украсть предмет у игрока (1 действие)")
+                len_actions += 1 # Снимаем блокировку 7 ого действия, если игрок хамелеон
+                print("7. Украсть предмет у игрока (1 действие)")
             print("-" * 30)
             while True:
                 number = number_of_action()

@@ -13,18 +13,28 @@ class Player:
         self.inventory = []
         self.inventory_weight = 0
         self.different_artefacts = set()
+        self.location_explored = False
+        self.item_was_taken = False
+
 
     def take_item(self):
-        item_id = self.location.location_item_id
+        item_id = self.location.location_items_by_player.get(self.user_name)
+        if item_id is None:
+            print("В этой локации нет предметов для вас.")
+            return
         item = self.items[item_id]
         if self.inventory_weight + item.weight > self.unit.weight:
             print("Вы не можете взять этот предмет!")
             return
+        print(f"Вы подобрали предмет: {item.name} (вес: {item.weight} кг).")
         self.inventory.append(item)
         self.inventory_weight += item.weight
         item.current_quantity -= 1
         if item.item_type == "Артефакт":
             self.different_artefacts.add(item)
+        self.item_was_taken = True
+        del self.location.location_items_by_player[self]  # удалили после взятия
+
 
     def get_item(self, item):
         self.inventory.append(item)
@@ -35,12 +45,28 @@ class Player:
 
 
     def throw_item(self, item):
-        if item in self.inventory:
-            self.inventory.remove(item)
-            self.inventory_weight -= item.weight
-            item.current_quantity += 1
-        else:
+        if item not in self.inventory:
             print("У вас нет этого предмета в инвентаре!")
+            return
+        self.inventory.remove(item)
+        self.inventory_weight -= item.weight
+        item.current_quantity += 1
+        if item.item_type == "Артефакт":
+            self.different_artefacts.remove(item)
+
+
+    def choose_the_item_to_throw(self):
+        inventory_names = self.get_inventory_names()
+        while True:
+            print(f"Выберите предмет, который вы хотите выбросить из инвентаря:")
+            for i in range(1, len(inventory_names) + 1):
+                print(f"{i}. {inventory_names[i - 1]}")
+            n = number_of_action()
+            while n is None or not (1 <= n <= len(inventory_names)):
+                print("Некорректный номер предмета! Попробуйте снова.")
+                n = number_of_action()
+            return n - 1  # возвращаем индекс, не id
+
 
     def get_inventory_names(self):
         return [item.name for item in self.inventory]
@@ -59,6 +85,7 @@ class Player:
         self.location.delete_player(self)
         self.location = locations[new_location_id]
         self.location.add_player(self)
+        self.location.spawn_item_for_player(self)
         self.unit.use_actions(action_cost)
         print(f"{self.user_name} переместился в {self.location.name}")
 

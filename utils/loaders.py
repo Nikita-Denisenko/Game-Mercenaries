@@ -42,5 +42,6 @@ def create_players(quantity, names, units, locations, items):
     shuffle(units_id)
     for i in range(quantity):
         player = Player(names[i], units_id[i], choice(locations_id), units, locations, items)
+        locations[player.location].current_players.append(player)  # ВАЖНО: добавить игрока в текущую локацию
         players.append(player)
     return players

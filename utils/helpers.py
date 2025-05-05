@@ -15,15 +15,6 @@ def generate_item(location_items):
             return k
 
 
-def spawn_item(location_items, items):
-    item_id = generate_item(location_items)
-    item_current_quantity = items[item_id].current_quantity
-    while item_current_quantity == 0:
-        item_id = generate_item(location_items)
-        item_current_quantity = items[item_id].current_quantity
-    return item_id
-
-
 def create_item_from_data(item_id, item_data):
     name = item_data["name"]
     item_type = item_data["item_type"]
