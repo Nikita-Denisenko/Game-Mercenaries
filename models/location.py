@@ -1,4 +1,4 @@
-from utils.helpers import generate_item
+from utils.helpers import generate_item_from_location
 
 
 class Location:
@@ -23,9 +23,9 @@ class Location:
     def spawn_item_for_player(self, player):
         if player.user_name in self.location_items_by_player:
             return  # уже есть предмет для этого игрока
-        item_id = generate_item(self.items)
-        item_current_quantity = self.equipment[item_id].current_quantity
-        while item_current_quantity == 0:
-            item_id = generate_item(self.items)
-            item_current_quantity = self.equipment[item_id].current_quantity
+        location = player.location
+        item_id = generate_item_from_location(location)
+        item = self.equipment[item_id]
+        if item.current_quantity == 0:
+            return  # предмета нет в наличии
         self.location_items_by_player[player.user_name] = item_id

@@ -8,11 +8,11 @@ from models.items.weapon import Weapon
 from models.items.weapon_upgrade import WeaponUpgrade
 
 
-def generate_item(location_items):
-    number = randint(1, 100)
-    for k, v in location_items.items():
-        if number in range(v[0], v[1] + 1):
-            return k
+def generate_item_from_location(location):
+    roll = randint(1, 100)
+    for item_id, (start, end) in location.items.items():
+        if start <= roll <= end:
+            return item_id
 
 
 def create_item_from_data(item_id, item_data):
