@@ -1,10 +1,10 @@
 from utils.interface import print_choose_action_text, number_of_action, \
-    print_player_was_killed_text, print_player_was_damaged_text, print_the_map
+    print_player_was_killed_text, print_player_was_damaged_text, print_the_map, print_players_in_locations_info, next_to
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
     calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
     is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7, print_choose_the_location_info, \
     is_p350, two_pistols_logic, armor_is_broken, player_was_died_on_chemical_factory, lizard_man_logic, \
-    is_chameleon_man, steal_item_for_chameleon_man, throw_item_from_inventory
+    is_chameleon_man, steal_item_for_chameleon_man, throw_item_from_inventory, check_one_survivor_flag
 
 KNIFE = "4"
 LASER_SIGHT = "10"
@@ -20,13 +20,17 @@ class CurrentGame:
         self.all_players = players
         self.alive_players = players
         self.day_number = 1
+        self.game_is_over = False
 
     def finish_day(self):
         self.day_number += 1
         for player in self.alive_players:
             player.unit.restore_actions()
+        print()
+        print('*' * 60)
         print(f"День {self.day_number}")
-
+        print('*' * 60)
+        print()
 
     def kill_player(self, player):
         self.alive_players.remove(player)
@@ -37,7 +41,7 @@ class CurrentGame:
         for player in players:
             print(f"Имя: {player.user_name}; Персонаж: {player.unit.name};")
             print(f"Здоровье: {player.unit.current_health}; Локация: {player.location.name};")
-            print("-" * 30)
+            print("-" * 60)
 
 
     def choose_player_to_attack(self, attacker):
@@ -75,7 +79,7 @@ class CurrentGame:
         distance = calculate_distance(attackers_location, defenders_location)
         accuracy = calculate_accuracy(attacker, defender, weapon, laser_sight, camouflage, distance)
         damage = calculate_damage(defender, weapon, armor)
-        defender_name = defender.name
+        defender_name = defender.user_name
 
         if is_p350(weapon):
             if two_pistols_logic(self, attacker, defender, weapon, accuracy):
@@ -108,11 +112,9 @@ class CurrentGame:
             self.kill_player(defender)
             print_player_was_killed_text(defender_name)
 
-        attacker.unit.print_actions_info()
-
 
     def hand_fight(self, attacker, defender, knife):
-        defender_name = defender.name
+        defender_name = defender.user_name
         damage = calculate_hand_fight_damage(attacker, defender, knife)
         accuracy = knife.accuracy
         flag = hit_the_player(accuracy)[0]
@@ -131,7 +133,6 @@ class CurrentGame:
 
         print(f"Игрок {defender_name} получил {damage} урона от вашей атаки.")
         print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
-        attacker.unit.print_actions_info()
 
     def attack_player(self, attacker):
         action_cost = 1
@@ -140,6 +141,11 @@ class CurrentGame:
         camouflage = equipment[CAMOUFLAGE]
         armor = equipment[ARMOR]
         knife = equipment[KNIFE]
+
+        print_the_map()
+        print()
+        print_players_in_locations_info(attacker, self.locations)
+        print()
 
         defender = self.choose_player_to_attack(attacker)
         if defender is None:
@@ -185,6 +191,8 @@ class CurrentGame:
 
                 self.weapon_fight(attacker, defender, weapon, laser_sight, camouflage, armor)
                 attacker.unit.use_actions(action_cost)
+                if check_one_survivor_flag(self.alive_players):
+                    self.end_game()
                 return
 
             if number == 2:
@@ -204,6 +212,8 @@ class CurrentGame:
 
                 self.hand_fight(attacker, defender, knife)
                 attacker.unit.use_actions(action_cost)
+                if check_one_survivor_flag(self.alive_players):
+                    self.end_game()
                 return
 
 
@@ -214,14 +224,13 @@ class CurrentGame:
         print(f"Вы находитесь в локации {location.name}")
         print_choose_the_location_info(location, locations)
         while True:
-            new_location_id = number_of_action()
-            if new_location_id is None or not (1 <= new_location_id <= len(locations)):
+            new_location_id = str(number_of_action())
+            if new_location_id is None or not (1 <= int(new_location_id) <= len(locations)):
                 print("Некорректный номер локации! Попробуйте снова.")
                 continue
             player.change_location(new_location_id, locations)
             if player.location != location:
                 break
-        player.unit.print_actions_info()
 
 
     def search_location(self, player):
@@ -273,24 +282,37 @@ class CurrentGame:
             item_was_taken = player.item_was_taken
             if location_explored:
                 actions[2] = lambda p: p.take_item()
+            print("-" * 60)
             print(f"Ходит игрок {player.user_name}")
-            print("-" * 30)
+            print("-" * 60)
             player.print_player_info()
-            print("-" * 30)
+            print("-" * 60)
+            player.unit.print_unit_info()
+            print("-" * 60)
+            next_to()
+            print_players_in_locations_info(player, self.locations)
+            print("-" * 60)
             print_choose_action_text(location_explored, item_was_taken)
             if is_chameleon_man(player.unit):
                 len_actions += 1 # Снимаем блокировку 7 ого действия, если игрок хамелеон
                 print("7. Украсть предмет у игрока (1 действие)")
-            print("-" * 30)
+            print("-" * 60)
             while True:
                 number = number_of_action()
                 if number is None or not (1 <= number <= len_actions):
                     print("Некорректный номер действия. Попробуйте снова")
                     continue
                 actions[number](player)
+                if player.check_artefacts_flag():
+                    self.end_game()
+                next_to()
                 break
             if player.unit.current_actions == 0:
                 lizard_man_logic(player)
                 print("У вас не осталось действий! Ход завершен!")
                 actions[end_turn_for_player_number](player)
+                next_to()
                 return
+
+    def end_game(self):
+        self.game_is_over = True

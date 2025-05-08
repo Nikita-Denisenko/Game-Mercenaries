@@ -33,7 +33,7 @@ class Player:
         if item.item_type == "Артефакт":
             self.different_artefacts.add(item)
         self.item_was_taken = True
-        del self.location.location_items_by_player[self]  # удалили после взятия
+        del self.location.location_items_by_player[self.user_name]  # удалили после взятия
 
 
     def get_item(self, item):
@@ -133,3 +133,6 @@ class Player:
     def end_turn(self):
         self.unit.current_actions = 0
         print(f"Игрок {self.user_name} завершил свой ход.")
+
+    def check_artefacts_flag(self):
+        return len(self.different_artefacts) == 3

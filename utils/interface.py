@@ -98,3 +98,17 @@ def print_player_was_damaged_text(player_name, damage, player):
     print(f"Текущее здоровье игрока {player_name}: {player.unit.current_health} из {player.unit.max_health}")
     print("-" * 60)
     print()
+
+
+def print_players_in_locations_info(player, locations):
+    player_location_name = player.location.name
+    print(f"Вы находитесь в локации {player_location_name}")
+    for location in locations.values():
+       current_players_names = [p.user_name for p in location.current_players if p != player]
+       current_players_info = ("Нет игроков", current_players_names)[len(current_players_names) > 0]
+       info = f"{location.name}: {current_players_info}"
+       print(info)
+
+
+def next_to():
+    input("Введите любой символ чтобы продолжить.")

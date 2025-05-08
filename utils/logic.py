@@ -1,6 +1,6 @@
 from random import choice, randint
 
-from utils.interface import print_player_was_killed_text, print_player_was_damaged_text, number_of_action
+from utils.interface import print_player_was_killed_text, print_player_was_damaged_text, number_of_action, next_to
 
 EAGLE_CLIFF = "7"
 CHEMICAL_FACTORY = "4"
@@ -156,6 +156,7 @@ def process_second_shot_mp7(game, attacker, defender, weapon, accuracy):
 
     if not second_flag:
         print(f"Увы, вы не попали в игрока {defender_name} и со второго выстрела!")
+        next_to()
         return False
 
     print(f"Вы попали в игрока {defender_name} со второго выстрела!")
@@ -164,8 +165,10 @@ def process_second_shot_mp7(game, attacker, defender, weapon, accuracy):
     if not defender.unit.is_alive():
         game.kill_player(defender)
         print_player_was_killed_text(defender_name)
+        next_to()
 
     print_player_was_damaged_text(defender_name, damage, defender)
+    next_to()
     attacker.unit.print_actions_info()
     return True
 
@@ -178,6 +181,7 @@ def process_armor_break(defender, damage, armor, camouflage):
         defender.throw_item(camouflage)
         damage += 20
         print(f"Защитная экипировка игрока {defender.user_name} разрушена!")
+        next_to()
 
     return damage
 
@@ -200,9 +204,11 @@ def process_grenade_explosion(game, attacker, defender, weapon, defenders_locati
         if not player.unit.is_alive():
             game.kill_player(player)
             print_player_was_killed_text(player_name)
+            next_to()
             continue
 
         print_player_was_damaged_text(player_name, player_damage, player)
+        next_to()
 
 
 def two_pistols_logic(game, attacker, defender, weapon, accuracy):
@@ -229,6 +235,7 @@ def two_pistols_logic(game, attacker, defender, weapon, accuracy):
         flag, number = hit_the_player(accuracy - weapon.rules["two_pistols_cut_accuracy"])
         if not flag:
             print(f"Вы не попали в игрока {defender_name}!")
+            next_to()
             continue
         both_missed = False
         damage = calculate_damage(defender, weapon, game.equipment[ARMOR])
@@ -237,11 +244,14 @@ def two_pistols_logic(game, attacker, defender, weapon, accuracy):
         if not defender.unit.is_alive():
             game.kill_player(defender)
             print_player_was_killed_text(defender_name)
+            next_to()
             return True
         print_player_was_damaged_text(defender_name, damage, defender)
     player_was_died_on_chemical_factory(game, attacker, attacker.location, number)
+    next_to()
     if both_missed:
         attacker.unit.print_actions_info()
+        next_to()
     return True
 
 
@@ -255,9 +265,11 @@ def player_was_died_on_chemical_factory(game, attacker, attackers_location, numb
     if not attacker.unit.is_alive():
         game.kill_player(attacker)
         print("Вы умерли от травмы на химическом заводе!")
+        next_to()
         return True
     print("Вы получили травму на химическом заводе и потеряли 20 жизней!")
     print(f"Ваше текущее здоровье: {attacker.unit.current_health} из {attacker.unit.max_health}")
+    next_to()
     return False
 
 
@@ -268,13 +280,19 @@ def lizard_man_logic(player):
     player.unit.restore_health(hp_bonus)
     print(f'Вы использовали способность "Человека-ящера" и восстановили здоровье')
     print(f"Ваше текущее здоровье: {player.unit.current_health} из {player.unit.max_health}")
+    next_to()
 
 
 def choose_player_for_steal_item(chameleon, chameleon_player_location):
     players = [player for player in chameleon_player_location.current_players if player != chameleon]
+    if len(players) == 0:
+        print("В вашей локации нет игроков!")
+        next_to()
+        return None
     for i in range(1, len(players) + 1):
         player_name = players[i - 1].user_name
         print(f"{i}. {player_name}")
+    print("Выберите игрока у которого вы хотите украсть предмет:")
     n = number_of_action()
     while n is None or not (1 <= n <= len(players)):
         print("Некорректный номер игрока! Попробуйте снова.")
@@ -287,11 +305,14 @@ def steal_item_for_chameleon_man(chameleon_player):
     chameleon_player_location = chameleon_player.location
     while True:
         enemy = choose_player_for_steal_item(chameleon_player, chameleon_player_location)
-        enemy_name = enemy.name
+        if enemy is None:
+            return
+        enemy_name = enemy.user_name
         enemy_inventory = enemy.inventory
         inventory_names = enemy.get_inventory_names()
         if len(enemy_inventory) == 0:
             print("У этого игрока нет предметов! Выберите другого.")
+            next_to()
             continue
         print("1. Далее")
         print("2. Выбрать другого игрока")
@@ -302,6 +323,7 @@ def steal_item_for_chameleon_man(chameleon_player):
             n = number_of_action()
         if n == 3:
             print("Вы отменили действие.")
+            next_to()
             return
         if n == 2:
             continue
@@ -326,6 +348,7 @@ def steal_item_for_chameleon_man(chameleon_player):
                     n = number_of_action()
                 if n == 3:
                     print("Вы отменили действие.")
+                    next_to()
                     return
                 if n == 2:
                     break
@@ -335,7 +358,9 @@ def steal_item_for_chameleon_man(chameleon_player):
             chameleon_player.get_item(item)
             chameleon_player.unit.use_actions(action_cost)
             print(f'Вы украли предмет "{item.name}" у игрока {enemy_name}.')
+            next_to()
             chameleon_player.unit.print_actions_info()
+            next_to()
             return
 
 
@@ -343,3 +368,7 @@ def throw_item_from_inventory(player):
     item_index = player.choose_the_item_to_throw()
     item = player.inventory[item_index]
     player.throw_item(item)
+
+
+def check_one_survivor_flag(alive_players):
+    return len(alive_players) == 1

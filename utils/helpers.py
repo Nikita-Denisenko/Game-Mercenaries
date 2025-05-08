@@ -27,7 +27,7 @@ def create_item_from_data(item_id, item_data):
     match item_type:
         case "Оружие":
             return Weapon(item_id, name, item_type, quantity, weight, info, rules,
-                          item_data["weapon_type"], item_data["damage"],
+                          item_data["weapon_type"], item_data["damage_range"],
                           item_data["distance"], item_data["accuracy"])
 
         case "Бустер на оружие":

@@ -9,6 +9,7 @@ class Unit:
         self.weight = units[unit_id]["weight"]
         self.info = units[unit_id]["info"]
         self.rules = units[unit_id].get("rules", None)
+        self.units = units
 
     def take_damage(self, damage):
         self.current_health -= damage
@@ -27,3 +28,7 @@ class Unit:
 
     def print_actions_info(self):
         print(f"У вас осталось действий: {self.current_actions} из {self.actions}")
+
+    def print_unit_info(self):
+        unit_id = self.unit_id
+        print(self.units[unit_id]["info"])
