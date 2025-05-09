@@ -1,7 +1,7 @@
 from utils.interface import print_choose_action_text, number_of_action, \
-    print_player_was_killed_text, print_player_was_damaged_text, print_the_map, print_players_in_locations_info, next_to
+    print_player_was_killed_text, print_player_was_damaged_text, print_the_map, next_to
 from utils.logic import calculate_distance, calculate_accuracy, calculate_damage, hit_the_player, \
-    calculate_hand_fight_damage, is_crab_man, heal_the_player, end_turn_for_player, is_grenade_launcher, \
+    calculate_hand_fight_damage, is_crab_man, end_turn_for_player, is_grenade_launcher, \
     is_mp7, process_grenade_explosion, process_armor_break, process_second_shot_mp7, print_choose_the_location_info, \
     is_p350, two_pistols_logic, armor_is_broken, player_was_died_on_chemical_factory, lizard_man_logic, \
     is_chameleon_man, steal_item_for_chameleon_man, throw_item_from_inventory, check_one_survivor_flag
@@ -10,6 +10,7 @@ KNIFE = "4"
 LASER_SIGHT = "10"
 CAMOUFLAGE = "12"
 ARMOR = "11"
+HEALTH_KIT = "13"
 
 
 class CurrentGame:
@@ -48,7 +49,10 @@ class CurrentGame:
         players = [player for player in self.alive_players if player != attacker]
         print("Выберите игрока, которого хотите атаковать.")
         for i in range(1, len(players) + 1):
-            print(f"{i}. {players[i - 1].user_name}")
+            player = players[i - 1]
+            max_hp = player.unit.max_health
+            hp = player.unit.current_health
+            print(f"{i}. {player.user_name}({player.unit.name}) {hp} из {max_hp} жизней")
         number = None
         while number is None:
             number = number_of_action()
@@ -71,7 +75,10 @@ class CurrentGame:
 
     def weapon_fight(self, attacker, defender, weapon, laser_sight, camouflage, armor):
         if is_crab_man(attacker.unit):
+            print()
+            print("-" * 60)
             print("Вы не можете пользоваться оружием, у вас клешни! :)")
+            print("-" * 60)
             return
 
         attackers_location = attacker.location
@@ -92,11 +99,15 @@ class CurrentGame:
 
         if not flag:
             if not is_mp7(weapon):
+                print()
+                print("-" * 60)
                 print(f"Вы не попали в игрока {defender_name}!")
+                print("-" * 60)
                 return
             if not process_second_shot_mp7(self, attacker, defender, weapon, accuracy):
                 return
-
+        print()
+        print("-" * 60)
         print(f"Вы попали в игрока {defender_name}!")
 
         if armor_is_broken(number):
@@ -119,9 +130,12 @@ class CurrentGame:
         accuracy = knife.accuracy
         flag = hit_the_player(accuracy)[0]
         if not flag:
+            print()
+            print("-" * 60)
             print(f"Игрок {defender_name} увернулся от вашей атаки!")
             return
-
+        print()
+        print("-" * 60)
         print(f"Вы атаковали игрока {defender_name}!")
 
         defender.unit.take_damage(damage)
@@ -133,6 +147,7 @@ class CurrentGame:
 
         print(f"Игрок {defender_name} получил {damage} урона от вашей атаки.")
         print(f"Текущее здоровье игрока {defender_name}: {defender.unit.current_health} из {defender.unit.max_health}")
+        print("-" * 60)
 
     def attack_player(self, attacker):
         action_cost = 1
@@ -142,9 +157,7 @@ class CurrentGame:
         armor = equipment[ARMOR]
         knife = equipment[KNIFE]
 
-        print_the_map()
-        print()
-        print_players_in_locations_info(attacker, self.locations)
+        print_the_map(self.locations, attacker)
         print()
 
         defender = self.choose_player_to_attack(attacker)
@@ -216,11 +229,15 @@ class CurrentGame:
                     self.end_game()
                 return
 
+    def heal_the_player(self, player):
+        player.use_health_kit(self.equipment[HEALTH_KIT])
+        player.unit.print_actions_info()
+
 
     def to_move_player(self, player):
         location = player.location
         locations = self.locations
-        print_the_map()
+        print_the_map(locations, player)
         print(f"Вы находитесь в локации {location.name}")
         print_choose_the_location_info(location, locations)
         while True:
@@ -270,7 +287,7 @@ class CurrentGame:
             1: self.to_move_player,
             2: self.search_location,
             3: self.attack_player,
-            4: heal_the_player,
+            4: self.heal_the_player,
             5: throw_item_from_inventory,
             6: end_turn_for_player,
             7: steal_item_for_chameleon_man
@@ -290,7 +307,6 @@ class CurrentGame:
             player.unit.print_unit_info()
             print("-" * 60)
             next_to()
-            print_players_in_locations_info(player, self.locations)
             print("-" * 60)
             print_choose_action_text(location_explored, item_was_taken)
             if is_chameleon_man(player.unit):

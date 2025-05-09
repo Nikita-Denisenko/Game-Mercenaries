@@ -87,6 +87,7 @@ class Player:
         self.location.add_player(self)
         self.location.spawn_item_for_player(self)
         self.unit.use_actions(action_cost)
+        self.item_was_taken = False
         print(f"{self.user_name} переместился в {self.location.name}")
 
 

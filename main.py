@@ -36,7 +36,7 @@ def game_loop(game):
     next_to()
     while True:
         for player in game.alive_players:
-            print_the_map()
+            print_the_map(game.locations, player)
             print("*" * 60)
             print(f"День {game.day_number}")
             print("*" * 60)

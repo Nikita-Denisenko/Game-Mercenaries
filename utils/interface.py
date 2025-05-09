@@ -17,29 +17,44 @@ def print_the_rules_text():
          )
 
 
-def print_the_map():
-    print(                                "Карта"                                 )
-    print(                                                                        )
-    print("      [Химический завод]----------------------[Загрязнённое побережье]")
-    print("      |                 \                    /                 |      ")
-    print("      |                  \                  /                  |      ")
-    print("      |                   \                /                   |      ")
-    print("      |                    \              /                    |      ")
-    print("      |                     \            /                     |      ")
-    print("      |                      \          /                      |      ")
-    print("      |                       [Пустошь]                        |      ")
-    print("      |                           |                            |      ")
-    print("      |                           |                            |      ")
-    print("      |                           |                            |      ")
-    print("      |                           |                            |      ")
-    print("[Место крушения поезда]-----[Орлиный утёс]-----[Разгромленный супермаркет]")
-    print("                      \                       /                           ")
-    print("                       \                     /                            ")
-    print("                        \                   /                             ")
-    print("                         \                 /                              ")
-    print("                          \               /                               ")
-    print("                           \             /                                ")
-    print("                             [Госпиталь]                                  ")
+def print_the_map(locations, player):
+    locations_info_dict = players_in_locations_info(locations, player)
+    chemical_factory = locations_info_dict["Химический завод"]
+    supermarket = locations_info_dict["Разгромленный супермаркет"]
+    shore = locations_info_dict["Загрязнённое побережье"]
+    wasteland = locations_info_dict["Пустошь"]
+    eagle_cliff = locations_info_dict["Орлиный утёс"]
+    train = locations_info_dict["Место крушения поезда"]
+    hospital = locations_info_dict["Госпиталь"]
+
+    print(f"                                      Карта                                  ")
+    print(f"    {chemical_factory}                              {shore}             ")
+    print("     ||====================||                        ||========================||")
+    print("     ||  Химический завод  ||------------------------|| Загрязнённое побережье ||")
+    print("     ||====================||                        ||========================||")
+    print("      |                \                                     /             |   ")
+    print("      |                  \                                 /               |   ")
+    print(f"                                {wasteland}                                      ")
+    print("      |                     \    ||===============||    /                  |   ")
+    print("      |                       \  ||    Пустошь    ||  /                    |   ")
+    print("      |                         \||===============||/                      |      ")
+    print("      |                                   |                                |  ")
+    print("      |                                   |                                |     ")
+    print("      |                                   |                                |     ")
+    print(f"      {train}                           {eagle_cliff}              {supermarket}           ")
+    print("     ||=======================||       ||===============||         ||===========================||")
+    print("     || Место крушения поезда ||-------|| Орлиный утёс] ||---------|| Разгромленный супермаркет ||")
+    print("     ||=======================||       ||===============||         ||===========================||")
+    print("                       \                                           /                              ")
+    print("                        \                                       /                                 ")
+    print("                         \                                   /                                    ")
+    print("                          \                                /                                      ")
+    print("                           \                            /                                         ")
+    print("                            \                         /                                           ")
+    print("                             ||===========||       /                                              ")
+    print("                             || Госпиталь ||    /                                                 ")
+    print("                             ||===========|| /                                                    ")
+    print(f"                             {hospital}                                                          ")
 
 
 def print_choose_action_text(location_explored, item_was_taken):
@@ -100,15 +115,16 @@ def print_player_was_damaged_text(player_name, damage, player):
     print()
 
 
-def print_players_in_locations_info(player, locations):
-    player_location_name = player.location.name
-    print(f"Вы находитесь в локации {player_location_name}")
+def players_in_locations_info(locations, player):
+    info_dict = {}
     for location in locations.values():
        current_players_names = [p.user_name for p in location.current_players if p != player]
-       current_players_info = ("Нет игроков", current_players_names)[len(current_players_names) > 0]
-       info = f"{location.name}: {current_players_info}"
-       print(info)
+       if location == player.location:
+            current_players_names.append("(Вы здесь)!")
+       current_players_info = ("Нет игроков", ", ".join(current_players_names))[len(current_players_names) > 0]
+       info_dict[location.name] = current_players_info
+    return info_dict
 
 
 def next_to():
-    input("Введите любой символ чтобы продолжить.")
+    input("Далее: ")

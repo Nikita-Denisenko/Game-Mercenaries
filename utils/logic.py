@@ -110,7 +110,8 @@ def calculate_hand_fight_damage(attacker, defender, knife):
         if attacker.unit.unit_id != HAND_FIGHTER:
             return damage
         damage += attacker.unit.rules["hand_attack_bonus"]
-    damage += randint(*knife.rules["hand_damage_bonus_range"])
+    else:
+        damage += randint(*knife.rules["hand_damage_bonus_range"])
 
     if defender.unit.unit_id != TORTOISE_MAN:
         return damage
@@ -124,10 +125,6 @@ def calculate_change_location_cost(location, new_location_id):
         return 2
     return None
 
-
-def heal_the_player(player):
-    player.use_health_kit()
-    player.unit.print_actions_info()
 
 def end_turn_for_player(player):
     player.end_turn()
